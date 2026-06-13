@@ -1,0 +1,11 @@
+# direnv
+.direnv
+.envrc
+
+# devenv local state
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# editor/runtime
+.DS_Store
