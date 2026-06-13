@@ -89,7 +89,7 @@ config.keys = {
 		key = "2",
 		mods = "LEADER",
 		action = act.SplitPane({
-			direction = "Right",
+			direction = "Down",
 			size = { Percent = 35 },
 		}),
 	},
@@ -97,7 +97,7 @@ config.keys = {
 		key = "3",
 		mods = "LEADER",
 		action = act.SplitPane({
-			direction = "Down",
+			direction = "Right",
 			size = { Percent = 35 },
 		}),
 	},

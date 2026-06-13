@@ -1,10 +1,33 @@
 {
   pkgs,
-  lib,
   config,
   ...
 }:
+let
+  rootMarkers = import ./root-markers.nix;
+  fzfBottomWinopts = {
+    height = 8;
+    width = 1;
+    row = 1;
+    col = 0;
+    border = "none";
+    backdrop = 100;
+    preview = {
+      hidden = true;
+      layout = "vertical";
+      vertical = "up:0%";
+      horizontal = "right:0%";
+      border = "none";
+      title = false;
+      scrollbar = false;
+    };
+  };
+in
 {
+  extraPlugins = with pkgs.vimPlugins; [
+    nvim-paredit
+  ];
+
   colorschemes.catppuccin = {
     enable = true;
     settings = {
@@ -16,24 +39,35 @@
         conditionals = [ ];
         keywords = [ ];
       };
+      integrations = {
+        blink_cmp = {
+          enabled = true;
+          style = "bordered";
+        };
+        diffview = true;
+        fzf = true;
+        gitsigns = true;
+        grug_far = true;
+        mini.enabled = true;
+        neogit = true;
+        rainbow_delimiters = true;
+        treesitter = true;
+        which_key = true;
+      };
     };
   };
 
   plugins = {
     fzf-lua = {
       enable = true;
-      profile = "fzf-native";
+      profile = null;
       settings = {
-        winopts = {
-          height = 0.86;
-          width = 0.92;
-          row = 0.5;
-          col = 0.5;
-          preview = {
-            layout = "horizontal";
-            horizontal = "right:55%";
-          };
+        "__unkeyed-0" = "ivy";
+        fzf_colors = true;
+        fzf_opts = {
+          "--layout" = "default";
         };
+        winopts = fzfBottomWinopts;
         keymap = {
           builtin = {
             __raw = ''
@@ -43,6 +77,67 @@
               }
             '';
           };
+          fzf = {
+            __raw = ''
+              {
+                ["ctrl-g"] = "abort",
+                ["ctrl-q"] = "select-all+accept",
+                ["ctrl-u"] = "half-page-up",
+                ["ctrl-d"] = "half-page-down",
+                ["ctrl-f"] = "preview-page-down",
+                ["ctrl-b"] = "preview-page-up",
+              }
+            '';
+          };
+        };
+        ui_select = {
+          winopts = {
+            height = 0.4;
+            width = 0.55;
+          };
+        };
+        oldfiles.include_current_session = true;
+        files = {
+          cwd_prompt = true;
+          cwd_prompt_shorten_len = 32;
+        };
+        grep = {
+          rg_glob = true;
+          glob_flag = "--iglob";
+          actions = {
+            "ctrl-g" = false;
+          };
+        };
+        grep_curbuf = {
+          previewer = "swiper";
+          winopts = fzfBottomWinopts;
+          actions = {
+            "ctrl-g" = false;
+          };
+        };
+        lgrep_curbuf = {
+          previewer = "swiper";
+          winopts = fzfBottomWinopts;
+        };
+        tags.actions."ctrl-g" = false;
+        blines = {
+          previewer = "swiper";
+          winopts = fzfBottomWinopts;
+        };
+        treesitter = {
+          previewer = "swiper";
+          winopts = fzfBottomWinopts;
+        };
+        git.blame = {
+          previewer = "swiper";
+          winopts = fzfBottomWinopts;
+        };
+        lsp = {
+          document_symbols = {
+            previewer = "swiper";
+            winopts = fzfBottomWinopts;
+          };
+          workspace_symbols.actions."ctrl-g" = false;
         };
       };
     };
@@ -64,6 +159,59 @@
       };
     };
 
+    grug-far = {
+      enable = true;
+      settings = {
+        debounceMs = 300;
+        maxSearchMatches = 2000;
+        maxWorkers = 8;
+        minSearchChars = 1;
+        normalModeSearch = true;
+        startInInsertMode = true;
+        engine = "ripgrep";
+        engines.ripgrep = {
+          path = "rg";
+          showReplaceDiff = true;
+        };
+      };
+    };
+
+    project-nvim = {
+      enable = true;
+      settings = {
+        manual_mode = true;
+        enable_autochdir = false;
+        silent_chdir = true;
+        scope_chdir = "win";
+        show_hidden = true;
+        patterns = rootMarkers;
+        history.size = 200;
+        fzf_lua = {
+          enabled = true;
+          show = "paths";
+          sort = "newest";
+        };
+      };
+    };
+
+    mini = {
+      enable = true;
+      modules.ai = {
+        n_lines = 500;
+        search_method = "cover_or_nearest";
+        silent = true;
+      };
+    };
+
+    comment = {
+      enable = true;
+      settings = {
+        mappings = false;
+        padding = true;
+        sticky = true;
+      };
+    };
+
     which-key = {
       enable = true;
       settings = {
@@ -73,15 +221,31 @@
         win.border = "single";
         spec = [
           {
-            __unkeyed-1 = "M-o";
-            group = "WezTerm panes";
+            __unkeyed-1 = "<F1>";
+            group = "Help";
           }
           {
-            __unkeyed-1 = "C-x";
+            __unkeyed-1 = "<C-x>";
             group = "Emacs prefix";
           }
           {
-            __unkeyed-1 = "M-l";
+            __unkeyed-1 = "<C-x><C-k>";
+            group = "Keyboard macro";
+          }
+          {
+            __unkeyed-1 = "<C-x>p";
+            group = "Project";
+          }
+          {
+            __unkeyed-1 = "<C-x>g";
+            group = "Git";
+          }
+          {
+            __unkeyed-1 = "<C-c>^";
+            group = "Git conflict";
+          }
+          {
+            __unkeyed-1 = "<M-l>";
             group = "LSP";
           }
         ];
@@ -92,6 +256,24 @@
       enable = true;
       setupLspCapabilities = true;
       settings = {
+        enabled = {
+          __raw = ''
+            function()
+              local disabled_filetypes = {
+                ["grug-far"] = true,
+                NeogitStatus = true,
+                oil = true,
+              }
+              return not disabled_filetypes[vim.bo.filetype]
+                and vim.bo.buftype ~= "prompt"
+                and vim.b.completion ~= false
+            end
+          '';
+        };
+        appearance = {
+          use_nvim_cmp_as_default = false;
+          nerd_font_variant = "mono";
+        };
         keymap = {
           preset = "none";
           "<C-n>" = [
@@ -103,7 +285,18 @@
             "fallback"
           ];
           "<C-y>" = [
-            "select_and_accept"
+            {
+              __raw = ''
+                function(cmp)
+                  if cmp.is_visible() then
+                    return cmp.select_and_accept()
+                  end
+                  require("my.editor").yank()
+                  return true
+                end
+              '';
+            }
+            "fallback"
           ];
           "<Tab>" = [
             "snippet_forward"
@@ -115,16 +308,57 @@
           ];
         };
         completion = {
-          documentation.auto_show = true;
-          list.selection.preselect = false;
+          menu = {
+            border = "single";
+            max_height = 12;
+            draw.treesitter = [ "lsp" ];
+          };
+          documentation = {
+            auto_show = true;
+            auto_show_delay_ms = 200;
+            window.border = "single";
+          };
+          ghost_text.enabled = false;
+          list.selection = {
+            preselect = false;
+            auto_insert = false;
+          };
         };
-        signature.enabled = true;
-        sources.default = [
-          "lsp"
-          "path"
-          "snippets"
-          "buffer"
-        ];
+        signature = {
+          enabled = true;
+          window.border = "single";
+        };
+        cmdline = {
+          enabled = true;
+          keymap = {
+            preset = "cmdline";
+            "<Left>" = false;
+            "<Right>" = false;
+          };
+          completion = {
+            list.selection.preselect = false;
+            menu.auto_show = {
+              __raw = ''
+                function()
+                  return vim.fn.getcmdtype() == ":"
+                end
+              '';
+            };
+            ghost_text.enabled = false;
+          };
+        };
+        sources = {
+          default = [
+            "lsp"
+            "path"
+            "buffer"
+          ];
+          providers = {
+            path.score_offset = 3;
+            lsp.score_offset = 0;
+            buffer.score_offset = -3;
+          };
+        };
       };
     };
 
@@ -154,12 +388,22 @@
       enable = true;
       grammarPackages = with config.plugins.treesitter.package.builtGrammars; [
         bash
+        clojure
+        commonlisp
+        diff
+        fennel
+        gitcommit
+        gitignore
+        janet_simple
         json
         lua
+        luadoc
         markdown
         markdown_inline
         nix
+        query
         regex
+        scheme
         toml
         vim
         vimdoc
@@ -173,26 +417,243 @@
 
     conform-nvim = {
       enable = true;
+      autoInstall.enable = true;
       settings = {
         format_on_save = {
-          timeout_ms = 1000;
+          timeout_ms = 3000;
           lsp_format = "fallback";
         };
         formatters_by_ft = {
+          bash = [ "shfmt" ];
           lua = [ "stylua" ];
           nix = [ "nixfmt" ];
+          sh = [ "shfmt" ];
         };
       };
     };
 
-    lint.enable = true;
-    gitsigns.enable = true;
-    diffview.enable = true;
-    neogit.enable = true;
-    oil.enable = true;
-    lualine.enable = true;
-    nvim-autopairs.enable = true;
+    lint = {
+      enable = true;
+      autoInstall = {
+        enable = true;
+        overrides = {
+          luacheck = pkgs.luajitPackages.luacheck;
+          markdownlint = pkgs.markdownlint-cli;
+        };
+      };
+      lintersByFt = {
+        bash = [ "shellcheck" ];
+        lua = [ "luacheck" ];
+        markdown = [ "markdownlint" ];
+        nix = [
+          "deadnix"
+          "statix"
+        ];
+        sh = [ "shellcheck" ];
+      };
+      autoCmd.event = [
+        "BufWritePost"
+        "InsertLeave"
+      ];
+    };
+    gitsigns = {
+      enable = true;
+      settings = {
+        signs = {
+          add.text = "│";
+          change.text = "│";
+          delete.text = "_";
+          topdelete.text = "‾";
+          changedelete.text = "~";
+          untracked.text = "┆";
+        };
+        signcolumn = true;
+        numhl = false;
+        linehl = false;
+        word_diff = false;
+        watch_gitdir.follow_files = true;
+        attach_to_untracked = true;
+        current_line_blame = false;
+        current_line_blame_opts = {
+          delay = 800;
+          virt_text_pos = "eol";
+        };
+      };
+    };
+    diffview = {
+      enable = true;
+      settings = {
+        enhanced_diff_hl = true;
+        view.merge_tool = {
+          layout = "diff3_mixed";
+          disable_diagnostics = true;
+          winbar_info = true;
+        };
+        file_panel = {
+          listing_style = "tree";
+          tree_options.flatten_dirs = true;
+        };
+      };
+    };
+    neogit = {
+      enable = true;
+      settings = {
+        kind = "tab";
+        graph_style = "unicode";
+        disable_hint = false;
+        disable_insert_on_commit = "auto";
+        remember_settings = true;
+        use_per_project_settings = true;
+        integrations = {
+          diffview = true;
+          fzf_lua = true;
+        };
+        commit_editor = {
+          kind = "tab";
+          show_staged_diff = true;
+          staged_diff_split_kind = "split";
+          spell_check = false;
+        };
+        sections = {
+          untracked.folded = false;
+          unstaged.folded = false;
+          staged.folded = false;
+          stashes.folded = true;
+          recent.folded = true;
+        };
+      };
+    };
+    git-conflict = {
+      enable = true;
+      settings = {
+        default_mappings = false;
+        default_commands = true;
+        disable_diagnostics = true;
+        list_opener = "copen";
+      };
+    };
+    oil = {
+      enable = true;
+      settings = {
+        default_file_explorer = true;
+        columns = [
+          "type"
+          "size"
+          "mtime"
+        ];
+        delete_to_trash = false;
+        skip_confirm_for_simple_edits = false;
+        prompt_save_on_select_new_entry = true;
+        keymaps = {
+          "<C-c>" = false;
+          "<C-h>" = false;
+          "<C-s>" = false;
+          "q" = "actions.close";
+        };
+        view_options = {
+          show_hidden = true;
+          natural_order = "fast";
+          sort = [
+            [
+              "type"
+              "asc"
+            ]
+            [
+              "name"
+              "asc"
+            ]
+          ];
+        };
+        win_options = {
+          wrap = false;
+          signcolumn = "no";
+          cursorcolumn = false;
+          foldcolumn = "0";
+          spell = false;
+          list = false;
+          conceallevel = 3;
+          concealcursor = "ncv";
+        };
+      };
+    };
+    lualine = {
+      enable = true;
+      settings = {
+        options = {
+          theme = "catppuccin";
+          globalstatus = true;
+          component_separators = {
+            left = "";
+            right = "";
+          };
+          section_separators = {
+            left = "";
+            right = "";
+          };
+          disabled_filetypes.statusline = [
+            "grug-far"
+            "oil"
+          ];
+        };
+        sections = {
+          lualine_a = [ "mode" ];
+          lualine_b = [
+            "branch"
+            "diff"
+            "diagnostics"
+          ];
+          lualine_c = [
+            {
+              __unkeyed-1 = "filename";
+              path = 1;
+            }
+          ];
+          lualine_x = [
+            "encoding"
+            "filetype"
+          ];
+          lualine_y = [ "progress" ];
+          lualine_z = [ "location" ];
+        };
+      };
+    };
+    nvim-autopairs = {
+      enable = true;
+      settings = {
+        disable_filetype = [
+          "TelescopePrompt"
+          "spectre_panel"
+          "snacks_picker_input"
+          "grug-far"
+          "NeogitStatus"
+          "gitcommit"
+          "oil"
+        ];
+        disable_in_macro = true;
+        disable_in_replace_mode = true;
+        check_ts = true;
+        map_cr = true;
+        map_bs = true;
+        map_c_h = false;
+        map_c_w = false;
+      };
+    };
     nvim-surround.enable = true;
-    rainbow-delimiters.enable = true;
+    rainbow-delimiters = {
+      enable = true;
+      strategy = {
+        "" = "global";
+        clojure = "local";
+        commonlisp = "local";
+        fennel = "local";
+        janet_simple = "local";
+        scheme = "local";
+      };
+      settings.blacklist = [
+        "markdown"
+        "toml"
+        "yaml"
+      ];
+    };
   };
 }
