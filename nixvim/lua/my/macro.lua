@@ -5,6 +5,8 @@ local state = {
 	counter = 1,
 }
 
+local region_namespace = vim.api.nvim_create_namespace("my_macro_region")
+
 local function termcodes(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, false, true)
 end
@@ -122,6 +124,11 @@ function M.edit()
 end
 
 function M.apply_to_region_lines()
+	if vim.fn.getreg(state.register) == "" then
+		notify("No macro in @" .. state.register, vim.log.levels.WARN)
+		return
+	end
+
 	local start_line = vim.fn.line("'<")
 	local end_line = vim.fn.line("'>")
 	if start_line <= 0 or end_line <= 0 then
@@ -131,10 +138,26 @@ function M.apply_to_region_lines()
 
 	local first = math.min(start_line, end_line)
 	local last = math.max(start_line, end_line)
+	local bufnr = vim.api.nvim_get_current_buf()
+	local marks = {}
+
+	vim.api.nvim_buf_clear_namespace(bufnr, region_namespace, 0, -1)
 	for line = first, last do
-		vim.api.nvim_win_set_cursor(0, { line, 0 })
-		vim.cmd("normal! @" .. state.register)
+		local id = vim.api.nvim_buf_set_extmark(bufnr, region_namespace, line - 1, 0, {
+			right_gravity = false,
+		})
+		table.insert(marks, id)
 	end
+
+	for index = #marks, 1, -1 do
+		local pos = vim.api.nvim_buf_get_extmark_by_id(bufnr, region_namespace, marks[index], {})
+		if #pos == 2 then
+			vim.api.nvim_win_set_cursor(0, { pos[1] + 1, 0 })
+			vim.cmd("normal! @" .. state.register)
+		end
+	end
+
+	vim.api.nvim_buf_clear_namespace(bufnr, region_namespace, 0, -1)
 	return_to_insert()
 end
 

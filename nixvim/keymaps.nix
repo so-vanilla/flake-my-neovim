@@ -45,9 +45,34 @@ let
       options.desc = "Next line";
     }
     {
+      mode = "x";
+      key = "<C-f>";
+      action = "l";
+      options.desc = "Forward char";
+    }
+    {
+      mode = "x";
+      key = "<C-b>";
+      action = "h";
+      options.desc = "Backward char";
+    }
+    {
+      mode = "x";
+      key = "<C-p>";
+      action = "k";
+      options.desc = "Previous line";
+    }
+    {
+      mode = "x";
+      key = "<C-n>";
+      action = "j";
+      options.desc = "Next line";
+    }
+    {
       mode = [
         "i"
         "n"
+        "x"
       ];
       key = "<C-a>";
       action = lua "function() require('my.editor').move_beginning_of_line() end";
@@ -63,16 +88,20 @@ let
       mode = [
         "i"
         "c"
+        "x"
       ];
       key = "<C-e>";
       action = "<End>";
       options.desc = "End of line";
     }
     {
-      mode = [
-        "i"
-        "c"
-      ];
+      mode = "i";
+      key = "<C-d>";
+      action = lua "function() require('softpair').forward_delete_char() end";
+      options.desc = "Softpair forward delete char";
+    }
+    {
+      mode = "c";
       key = "<C-d>";
       action = "<Del>";
       options.desc = "Delete char";
@@ -83,8 +112,44 @@ let
         "n"
       ];
       key = "<C-k>";
-      action = lua "function() require('my.puni').kill_line() end";
-      options.desc = "Puni kill line";
+      action = lua "function() require('softpair').kill_line() end";
+      options.desc = "Softpair kill line";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+      ];
+      key = "<C-S-k>";
+      action = lua "function() require('softpair').backward_kill_line() end";
+      options.desc = "Softpair backward kill line";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+      ];
+      key = "<M-C-d>";
+      action = lua "function() require('softpair').backward_kill_word() end";
+      options.desc = "Softpair backward kill word";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+      ];
+      key = "<M-BS>";
+      action = lua "function() require('softpair').backward_kill_word() end";
+      options.desc = "Softpair backward kill word";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+      ];
+      key = "<M-Del>";
+      action = lua "function() require('softpair').backward_kill_word() end";
+      options.desc = "Softpair backward kill word";
     }
     {
       mode = "i";
@@ -98,6 +163,96 @@ let
       action = "<C-o>b";
       options.desc = "Backward word";
     }
+    {
+      mode = "x";
+      key = "<M-f>";
+      action = "w";
+      options.desc = "Forward word";
+    }
+    {
+      mode = "x";
+      key = "<M-b>";
+      action = "b";
+      options.desc = "Backward word";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+      ];
+      key = "<M-d>";
+      action = lua "function() require('softpair').forward_kill_word() end";
+      options.desc = "Softpair forward kill word";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+        "x"
+      ];
+      key = "<M-C-f>";
+      action = lua "function() require('softpair').forward_sexp() end";
+      options.desc = "Softpair forward sexp";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+        "x"
+      ];
+      key = "<M-C-b>";
+      action = lua "function() require('softpair').backward_sexp() end";
+      options.desc = "Softpair backward sexp";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+        "x"
+      ];
+      key = "<M-C-a>";
+      action = lua "function() require('softpair').beginning_of_sexp() end";
+      options.desc = "Softpair beginning of sexp";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+        "x"
+      ];
+      key = "<M-C-e>";
+      action = lua "function() require('softpair').end_of_sexp() end";
+      options.desc = "Softpair end of sexp";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+        "x"
+      ];
+      key = "<M-(>";
+      action = lua "function() require('softpair').syntactic_backward_punct() end";
+      options.desc = "Softpair syntactic backward punct";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+        "x"
+      ];
+      key = "<M-)>";
+      action = lua "function() require('softpair').syntactic_forward_punct() end";
+      options.desc = "Softpair syntactic forward punct";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+      ];
+      key = "<C-c><Del>";
+      action = lua "function() require('softpair').force_delete() end";
+      options.desc = "Softpair force delete";
+    }
   ];
 in
 {
@@ -106,11 +261,11 @@ in
       mode = "i";
       key = "<Esc>";
       action = "<Nop>";
-      options.desc = "Disabled: use C-g C-g";
+      options.desc = "Disabled: use F12 F12";
     }
     {
       mode = "i";
-      key = "<C-g><C-g>";
+      key = "<F12><F12>";
       action = "<Esc>";
       options.desc = "Leave insert mode";
     }
@@ -121,7 +276,10 @@ in
       ];
       key = "<C-g>";
       action = lua "function() require('my.editor').keyboard_quit() end";
-      options.desc = "Keyboard quit";
+      options = {
+        desc = "Keyboard quit";
+        nowait = true;
+      };
     }
     {
       mode = "c";
@@ -154,6 +312,12 @@ in
       options.desc = "Select paragraph";
     }
     {
+      mode = "i";
+      key = "<C-y>";
+      action = lua "function() require('my.editor').yank() end";
+      options.desc = "Yank";
+    }
+    {
       mode = "x";
       key = "<M-w>";
       action = "y";
@@ -162,13 +326,13 @@ in
     {
       mode = "x";
       key = "<C-w>";
-      action = "d";
-      options.desc = "Kill region";
+      action = ":<C-u>lua require('softpair').kill_active_region(vim.fn.visualmode())<CR>";
+      options.desc = "Softpair kill region";
     }
     {
       mode = "x";
       key = "<C-y>";
-      action = "p";
+      action = "P";
       options.desc = "Paste over region";
     }
     {
@@ -708,8 +872,8 @@ in
         "i"
       ];
       key = "<M-C-p>";
-      action = lua "function() require('my.hydras').paredit() end";
-      options.desc = "Paredit hydra";
+      action = lua "function() require('my.hydras').softpair() end";
+      options.desc = "Softpair hydra";
     }
     {
       mode = [
@@ -762,7 +926,7 @@ in
         "i"
       ];
       key = "<M-l>f";
-      action = lua "function() require('conform').format({ async = true, lsp_format = 'fallback' }) end";
+      action = lua "function() require('my.editor').format() end";
       options.desc = "Format";
     }
     {
@@ -788,7 +952,7 @@ in
         "n"
         "i"
       ];
-      key = "<M-I>";
+      key = "<M-i>";
       action = lua "function() require('my.special_edit').pick_pane() end";
       options.desc = "Special edit for WezTerm pane";
     }

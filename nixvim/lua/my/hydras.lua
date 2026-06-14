@@ -10,11 +10,7 @@ end
 
 local function restore_insert()
 	if restore_insert_after_head then
-		vim.schedule(function()
-			if vim.api.nvim_get_mode().mode:match("^n") then
-				vim.cmd.startinsert()
-			end
-		end)
+		require("my.editor").start_insert_if_editable()
 	end
 end
 
@@ -55,6 +51,7 @@ local function setup_undo(Hydra)
 ^-----------^
 _u_: undo
 _r_: redo
+_C-g_: quit
 _q_: quit
 ]],
 		config = {
@@ -67,6 +64,7 @@ _q_: quit
 		heads = {
 			{ "u", protected(undo, "undo"), { desc = "undo" } },
 			{ "r", protected(redo, "undo"), { desc = "redo" } },
+			{ "<C-g>", nil, { exit = true, desc = "exit" } },
 			{ "<CR>", nil, { exit = true, desc = "exit" } },
 			{ "q", nil, { exit = true, desc = "exit" } },
 		},
@@ -83,6 +81,7 @@ local function setup_kmacro(Hydra)
 ^Repeat^
 ^--------------^
 _e_: call macro
+_C-g_: quit
 _q_: quit
 ]],
 		config = {
@@ -101,33 +100,23 @@ _q_: quit
 	})
 end
 
-local function setup_paredit(Hydra)
-	local ok, paredit = pcall(require, "nvim-paredit")
+local function setup_softpair(Hydra)
+	local ok, softpair = pcall(require, "softpair")
 	if not ok then
 		return
 	end
-	local puni = require("my.puni")
 
-	paredit.setup({
-		use_default_keys = false,
-		cursor_behaviour = "auto",
-		indent = {
-			enabled = true,
-		},
-		filetypes = { "clojure", "fennel", "scheme", "lisp", "commonlisp", "janet" },
-	})
-
-	local api = paredit.api
-	hydras.paredit = Hydra({
-		name = "Paredit",
+	hydras.softpair = Hydra({
+		name = "Softpair",
 		mode = { "n", "i" },
 		hint = [[
 ^Edit^             ^Move^
 ^---------------------------------^
 _C-w_: squeeze     _]_: slurp forward
 _s_: splice        _}_: barf forward
-_r_: raise form    _[_: slurp backward
-_R_: raise elem    _{_: barf backward
+^ ^                _[_: slurp backward
+^ ^                _{_: barf backward
+_C-g_: quit
 _q_: quit
 ]],
 		config = {
@@ -138,14 +127,13 @@ _q_: quit
 			},
 		},
 		heads = {
-			{ "<C-w>", protected(puni.squeeze, "puni"), { desc = "squeeze" } },
-			{ "s", protected(api.unwrap_form_under_cursor, "paredit"), { desc = "splice" } },
-			{ "r", protected(api.raise_form, "paredit"), { desc = "raise form" } },
-			{ "R", protected(api.raise_element, "paredit"), { desc = "raise element" } },
-			{ "]", protected(api.slurp_forwards, "paredit"), { desc = "slurp forward" } },
-			{ "}", protected(api.barf_forwards, "paredit"), { desc = "barf forward" } },
-			{ "[", protected(api.slurp_backwards, "paredit"), { desc = "slurp backward" } },
-			{ "{", protected(api.barf_backwards, "paredit"), { desc = "barf backward" } },
+			{ "<C-w>", protected(softpair.squeeze, "softpair"), { desc = "squeeze" } },
+			{ "s", protected(softpair.splice, "softpair"), { desc = "splice" } },
+			{ "]", protected(softpair.slurp_forward, "softpair"), { desc = "slurp forward" } },
+			{ "}", protected(softpair.barf_forward, "softpair"), { desc = "barf forward" } },
+			{ "[", protected(softpair.slurp_backward, "softpair"), { desc = "slurp backward" } },
+			{ "{", protected(softpair.barf_backward, "softpair"), { desc = "barf backward" } },
+			{ "<C-g>", nil, { exit = true, desc = "exit" } },
 			{ "<CR>", nil, { exit = true, desc = "exit" } },
 			{ "q", nil, { exit = true, desc = "exit" } },
 		},
@@ -192,6 +180,7 @@ _p_: prev    _l_: theirs/incoming   _L_: theirs all
 ^ ^          _b_: base              _B_: base all
 ^ ^          _a_: both              _A_: both all
 ^ ^          _0_: none              _N_: none all
+^ ^                                  _C-g_: quit
 ^ ^                                  _q_: quit
 ]],
 		config = {
@@ -277,6 +266,7 @@ _p_: prev    _l_: theirs/incoming   _L_: theirs all
 				end, "git-conflict"),
 				{ exit = true, desc = "none all" },
 			},
+			{ "<C-g>", nil, { exit = true, desc = "exit" } },
 			{ "<CR>", nil, { exit = true, desc = "exit" } },
 			{ "q", nil, { exit = true, desc = "exit" } },
 		},
@@ -301,6 +291,7 @@ _j_: down         _3_: split right         _L_: width +
 _k_: up           _0_: close               _J_: height -
 _l_: right        _o_: next                _K_: height +
 _p_: previous     _=_: balance             _q_: quit
+^ ^               ^ ^                      _C-g_: quit
 ]],
 		config = {
 			color = "pink",
@@ -330,6 +321,7 @@ _p_: previous     _=_: balance             _q_: quit
 			{ "L", protected(wincmd("5>"), "window"), { desc = "width +" } },
 			{ "J", protected(wincmd("3-"), "window"), { desc = "height -" } },
 			{ "K", protected(wincmd("3+"), "window"), { desc = "height +" } },
+			{ "<C-g>", nil, { exit = true, desc = "exit" } },
 			{ "<CR>", nil, { exit = true, desc = "exit" } },
 			{ "q", nil, { exit = true, desc = "exit" } },
 		},
@@ -344,7 +336,7 @@ function M.setup()
 	local Hydra = require("hydra")
 	setup_undo(Hydra)
 	setup_kmacro(Hydra)
-	setup_paredit(Hydra)
+	setup_softpair(Hydra)
 	setup_conflict(Hydra)
 	setup_window(Hydra)
 	initialized = true
@@ -368,9 +360,9 @@ function M.macro_end_and_call()
 	activate("kmacro", return_to_insert)
 end
 
-function M.paredit()
-	if hydras.paredit then
-		activate("paredit", was_insert())
+function M.softpair()
+	if hydras.softpair then
+		activate("softpair", was_insert())
 	end
 end
 

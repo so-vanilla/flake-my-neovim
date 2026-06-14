@@ -90,6 +90,7 @@ function M.switch()
 end
 
 local function open_oil(path)
+	require("my.editor").stop_insert()
 	require("oil").open(vim.fn.expand(path))
 end
 
@@ -116,6 +117,7 @@ function M.oil_prompt()
 end
 
 function M.neogit()
+	require("my.editor").stop_insert()
 	vim.cmd("Neogit cwd=" .. vim.fn.fnameescape(M.root()))
 end
 

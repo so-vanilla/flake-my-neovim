@@ -11,6 +11,11 @@
       url = "github:nix-community/neovim-nightly-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    softpair = {
+      url = "github:so-vanilla/softpair.nvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -20,50 +25,93 @@
       nixpkgs,
       nixvim,
       neovim-nightly-overlay,
+      softpair,
       flake-utils,
       ...
     }:
-    flake-utils.lib.eachSystem
-      [
+    let
+      systems = [
         "x86_64-linux"
         "aarch64-darwin"
-      ]
-      (
+      ];
+
+      nvimServerPath = "\${XDG_RUNTIME_DIR:-/tmp}/my-neovim-\${USER:-user}/special-edit.sock";
+
+      mkPkgs =
+        system:
+        import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+          overlays = [ neovim-nightly-overlay.overlays.default ];
+        };
+
+      mkNvimConfig =
         system:
         let
-          pkgs = import nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-            overlays = [ neovim-nightly-overlay.overlays.default ];
+          pkgs = mkPkgs system;
+        in
+        nixvim.lib.evalNixvim {
+          inherit system;
+          modules = [
+            ./nixvim
+            {
+              _module.args = {
+                softpairPlugin = softpair.packages.${system}.default;
+              };
+              nixpkgs.pkgs = pkgs;
+              package = pkgs.neovim;
+            }
+          ];
+        };
+
+      mkWeztermConfigText =
+        system:
+        builtins.replaceStrings
+          [
+            "@NVIM_BIN@"
+            "@NVIM_SERVER_PATH@"
+          ]
+          [
+            "${self.packages.${system}.neovim}/bin/nvim"
+            nvimServerPath
+          ]
+          (builtins.readFile ./wezterm/wezterm.lua);
+
+      homeManagerModule =
+        {
+          lib,
+          pkgs,
+          ...
+        }:
+        let
+          system = pkgs.stdenv.hostPlatform.system;
+        in
+        {
+          home.packages = [
+            self.packages.${system}.neovim
+            pkgs.tmux
+          ];
+
+          home.sessionVariables = {
+            EDITOR = lib.mkOverride 900 "nvim";
+            VISUAL = lib.mkOverride 900 "nvim";
+            WEZTERM_BIN = lib.mkDefault "${pkgs.wezterm}/bin/wezterm";
           };
 
-          nvimServerPath = "\${XDG_RUNTIME_DIR:-/tmp}/my-neovim-\${USER:-user}/special-edit.sock";
-
-          nvimConfig = nixvim.lib.evalNixvim {
-            inherit system;
-            modules = [
-              ./nixvim
-              {
-                nixpkgs.pkgs = pkgs;
-                package = pkgs.neovim;
-              }
-            ];
+          programs.wezterm = {
+            enable = true;
+            package = pkgs.wezterm;
+            extraConfig = mkWeztermConfigText system;
           };
+        };
 
+      systemOutputs = flake-utils.lib.eachSystem systems (
+        system:
+        let
+          pkgs = mkPkgs system;
+          nvimConfig = mkNvimConfig system;
           nvimPackage = nvimConfig.config.build.package;
-
-          weztermConfigText =
-            builtins.replaceStrings
-              [
-                "@NVIM_BIN@"
-                "@NVIM_SERVER_PATH@"
-              ]
-              [
-                "${nvimPackage}/bin/nvim"
-                nvimServerPath
-              ]
-              (builtins.readFile ./wezterm/wezterm.lua);
-
+          weztermConfigText = mkWeztermConfigText system;
           weztermConfig = pkgs.writeText "wezterm.lua" weztermConfigText;
         in
         {
@@ -73,7 +121,11 @@
             wezterm-config = weztermConfig;
           };
 
-          checks.default = nvimConfig.config.build.test;
+          checks = {
+            default = nvimConfig.config.build.test;
+            nixvim = nvimConfig.config.build.test;
+            softpair = softpair.checks.${system}.default;
+          };
 
           formatter = pkgs.nixfmt-tree;
 
@@ -87,25 +139,11 @@
             ];
           };
 
-          homeManagerModules.default =
-            { lib, ... }:
-            {
-              home.packages = with pkgs; [
-                nvimPackage
-                wezterm
-                tmux
-              ];
-
-              home.sessionVariables = {
-                EDITOR = lib.mkOverride 900 "nvim";
-                VISUAL = lib.mkOverride 900 "nvim";
-              };
-
-              programs.wezterm = {
-                enable = true;
-                extraConfig = weztermConfigText;
-              };
-            };
+          homeManagerModules.default = homeManagerModule;
         }
       );
+    in
+    nixpkgs.lib.recursiveUpdate systemOutputs {
+      homeManagerModules.default = homeManagerModule;
+    };
 }

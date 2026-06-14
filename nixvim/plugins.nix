@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  softpairPlugin,
   ...
 }:
 let
@@ -24,8 +25,8 @@ let
   };
 in
 {
-  extraPlugins = with pkgs.vimPlugins; [
-    nvim-paredit
+  extraPlugins = [
+    softpairPlugin
   ];
 
   colorschemes.catppuccin = {
@@ -69,14 +70,6 @@ in
         };
         winopts = fzfBottomWinopts;
         keymap = {
-          builtin = {
-            __raw = ''
-              {
-                ["<C-f>"] = "preview-page-down",
-                ["<C-b>"] = "preview-page-up",
-              }
-            '';
-          };
           fzf = {
             __raw = ''
               {
@@ -84,8 +77,6 @@ in
                 ["ctrl-q"] = "select-all+accept",
                 ["ctrl-u"] = "half-page-up",
                 ["ctrl-d"] = "half-page-down",
-                ["ctrl-f"] = "preview-page-down",
-                ["ctrl-b"] = "preview-page-up",
               }
             '';
           };
@@ -284,26 +275,21 @@ in
             "select_prev"
             "fallback"
           ];
-          "<C-y>" = [
-            {
-              __raw = ''
-                function(cmp)
-                  if cmp.is_visible() then
-                    return cmp.select_and_accept()
-                  end
-                  require("my.editor").yank()
-                  return true
-                end
-              '';
-            }
-            "fallback"
-          ];
           "<Tab>" = [
+            "select_and_accept"
             "snippet_forward"
             "fallback"
           ];
           "<S-Tab>" = [
             "snippet_backward"
+            "fallback"
+          ];
+          "<CR>" = [
+            "select_and_accept"
+            "fallback"
+          ];
+          "<C-m>" = [
+            "select_and_accept"
             "fallback"
           ];
         };
@@ -498,6 +484,16 @@ in
         "BufWritePost"
         "InsertLeave"
       ];
+      autoCmd.callback = {
+        __raw = ''
+          function()
+            if vim.bo.buftype ~= "" or vim.b.lint == false then
+              return
+            end
+            require("lint").try_lint()
+          end
+        '';
+      };
     };
     gitsigns = {
       enable = true;
@@ -584,7 +580,7 @@ in
           "size"
           "mtime"
         ];
-        delete_to_trash = false;
+        delete_to_trash = true;
         skip_confirm_for_simple_edits = false;
         prompt_save_on_select_new_entry = true;
         keymaps = {
@@ -658,27 +654,6 @@ in
           lualine_y = [ "progress" ];
           lualine_z = [ "location" ];
         };
-      };
-    };
-    nvim-autopairs = {
-      enable = true;
-      settings = {
-        disable_filetype = [
-          "TelescopePrompt"
-          "spectre_panel"
-          "snacks_picker_input"
-          "grug-far"
-          "NeogitStatus"
-          "gitcommit"
-          "oil"
-        ];
-        disable_in_macro = true;
-        disable_in_replace_mode = true;
-        check_ts = true;
-        map_cr = true;
-        map_bs = true;
-        map_c_h = false;
-        map_c_w = false;
       };
     };
     nvim-surround.enable = true;

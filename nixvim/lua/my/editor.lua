@@ -55,6 +55,46 @@ function M.yank()
 	feed("<C-r>+", "n")
 end
 
+function M.stop_insert()
+	local mode = vim.api.nvim_get_mode().mode
+	if mode:match("^[iR]") then
+		vim.cmd.stopinsert()
+	end
+end
+
+function M.format()
+	local restore_insert = vim.api.nvim_get_mode().mode:match("^[iR]") ~= nil
+
+	if vim.bo.buftype ~= "" or vim.bo.modifiable == false or vim.bo.readonly then
+		vim.notify("Format is only enabled for editable file buffers", vim.log.levels.WARN, {
+			title = "format",
+		})
+		return
+	end
+
+	if restore_insert then
+		M.stop_insert()
+	end
+
+	local ok, conform = pcall(require, "conform")
+	if ok then
+		conform.format({
+			async = false,
+			timeout_ms = 3000,
+			lsp_format = "fallback",
+		})
+	else
+		vim.lsp.buf.format({
+			async = false,
+			timeout_ms = 3000,
+		})
+	end
+
+	if restore_insert then
+		M.start_insert_if_editable()
+	end
+end
+
 local insert_disabled_filetypes = {
 	fzf = true,
 	["grug-far"] = true,

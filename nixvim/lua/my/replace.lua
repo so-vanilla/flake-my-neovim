@@ -1,11 +1,14 @@
 local M = {}
 
-local function current_file_or_cwd()
+local function current_file()
 	local name = vim.api.nvim_buf_get_name(0)
-	if name ~= "" then
-		return name
+	if name == "" or vim.bo.buftype ~= "" then
+		vim.notify("Buffer replace is only enabled for file buffers", vim.log.levels.WARN, {
+			title = "replace",
+		})
+		return nil
 	end
-	return vim.uv.cwd()
+	return name
 end
 
 local function grug(opts)
@@ -22,14 +25,22 @@ local function prefills(path, literal)
 end
 
 function M.buffer_literal()
+	local path = current_file()
+	if not path then
+		return
+	end
 	grug({
-		prefills = prefills(current_file_or_cwd(), true),
+		prefills = prefills(path, true),
 	})
 end
 
 function M.buffer_regexp()
+	local path = current_file()
+	if not path then
+		return
+	end
 	grug({
-		prefills = prefills(current_file_or_cwd(), false),
+		prefills = prefills(path, false),
 	})
 end
 

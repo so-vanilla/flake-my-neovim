@@ -141,7 +141,31 @@
         "flake-utils": "flake-utils",
         "neovim-nightly-overlay": "neovim-nightly-overlay",
         "nixpkgs": "nixpkgs",
-        "nixvim": "nixvim"
+        "nixvim": "nixvim",
+        "softpair": "softpair"
+      }
+    },
+    "softpair": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1781439096,
+        "narHash": "sha256-SrvhqYgQN7ns7oeH/oEjMdgJvbyvb6oxhP2GgrH/M68=",
+        "owner": "so-vanilla",
+        "repo": "softpair.nvim",
+        "rev": "fe831c4b554376fc7a072f13fcf1399e16bbc4f3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "so-vanilla",
+        "repo": "softpair.nvim",
+        "type": "github"
       }
     },
     "systems": {

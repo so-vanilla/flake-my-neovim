@@ -7,9 +7,20 @@ local nvim_bin = "@NVIM_BIN@"
 local nvim_server_path = "@NVIM_SERVER_PATH@"
 
 local function expand_server_path()
+	local override = os.getenv("MY_NEOVIM_SERVER")
+	if override ~= nil and override ~= "" then
+		return override
+	end
+
 	local runtime = os.getenv("XDG_RUNTIME_DIR") or "/tmp"
 	local user = os.getenv("USER") or "user"
-	return nvim_server_path:gsub("${XDG_RUNTIME_DIR:-/tmp}", runtime):gsub("${USER:-user}", user)
+	return nvim_server_path
+		:gsub("%${XDG_RUNTIME_DIR:%-/tmp%}", function()
+			return runtime
+		end)
+		:gsub("%${USER:%-user%}", function()
+			return user
+		end)
 end
 
 local function vim_quote(value)
@@ -56,6 +67,20 @@ local function open_special_edit(window, pane)
 		wezterm.log_error(message)
 		window:toast_notification("special-edit", message, nil, 5000)
 		return
+	end
+
+	local target_pane_id = stdout and stdout:match("^%s*(%d+)%s*$")
+	if target_pane_id ~= nil then
+		local activated = wezterm.run_child_process({
+			"wezterm",
+			"cli",
+			"activate-pane",
+			"--pane-id",
+			target_pane_id,
+		})
+		if activated then
+			return
+		end
 	end
 
 	window:perform_action(act.ActivatePaneDirection("Left"), pane)

@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   ...
 }:
@@ -48,39 +49,45 @@ in
     completeopt = "menu,menuone,noselect";
   };
 
-  extraPackages = with pkgs; [
-    basedpyright
-    bash-language-server
-    deadnix
-    dockerfile-language-server
-    fd
-    fzf
-    git
-    google-java-format
-    gopls
-    gotools
-    hadolint
-    jdt-language-server
-    luajitPackages.luacheck
-    markdownlint-cli
-    marksman
-    nixd
-    nixfmt
-    nodejs_24
-    prettier
-    ripgrep
-    ruff
-    shellcheck
-    shfmt
-    statix
-    stylua
-    taplo
-    terraform-ls
-    tflint
-    wezterm
-    vscode-langservers-extracted
-    yaml-language-server
-  ];
+  extraPackages =
+    (with pkgs; [
+      basedpyright
+      bash-language-server
+      deadnix
+      dockerfile-language-server
+      fd
+      fzf
+      git
+      google-java-format
+      gopls
+      gotools
+      hadolint
+      jdt-language-server
+      luajitPackages.luacheck
+      markdownlint-cli
+      marksman
+      nixd
+      nixfmt
+      nodejs_24
+      prettier
+      ripgrep
+      ruff
+      shellcheck
+      shfmt
+      statix
+      stylua
+      taplo
+      terraform-ls
+      tflint
+      vscode-langservers-extracted
+      yaml-language-server
+    ])
+    ++ lib.optionals pkgs.stdenv.isLinux (
+      with pkgs;
+      [
+        wl-clipboard
+      ]
+    );
 
   extraFiles = {
     "lua/my/editor.lua".source = ./lua/my/editor.lua;
@@ -88,7 +95,6 @@ in
     "lua/my/hydras.lua".source = ./lua/my/hydras.lua;
     "lua/my/macro.lua".source = ./lua/my/macro.lua;
     "lua/my/project.lua".source = ./lua/my/project.lua;
-    "lua/my/puni.lua".source = ./lua/my/puni.lua;
     "lua/my/region.lua".source = ./lua/my/region.lua;
     "lua/my/replace.lua".source = ./lua/my/replace.lua;
     "lua/my/root.lua".text = ''
@@ -122,8 +128,25 @@ in
   '';
 
   extraConfigLuaPost = ''
+    require("softpair").setup({
+      mappings = true,
+      disabled_filetypes = {
+        fzf = true,
+        ["grug-far"] = true,
+        help = true,
+        man = true,
+        NeogitStatus = true,
+        oil = true,
+        qf = true,
+      },
+      disabled_buftypes = {
+        nofile = true,
+        prompt = true,
+        quickfix = true,
+        terminal = true,
+      },
+    })
     require("my.hydras").setup()
-    vim.env.WEZTERM_BIN = "${pkgs.wezterm}/bin/wezterm"
     if #vim.api.nvim_list_uis() > 0 then
       require("my.server").start()
     end
@@ -134,6 +157,15 @@ in
       group = auto_insert_group,
       callback = function()
         require("my.editor").start_insert_if_editable()
+      end,
+    })
+    vim.api.nvim_create_autocmd({ "FileType", "BufEnter" }, {
+      group = auto_insert_group,
+      pattern = { "oil", "NeogitStatus", "help", "qf" },
+      callback = function()
+        vim.schedule(function()
+          require("my.editor").stop_insert()
+        end)
       end,
     })
     require("my.editor").start_insert_if_editable()
