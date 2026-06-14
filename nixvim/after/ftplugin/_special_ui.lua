@@ -6,9 +6,9 @@ local blocked_keys = {
 	{ modes = { "n", "i", "x" }, lhs = "<M-%>" },
 	{ modes = { "n", "i", "x" }, lhs = "<C-M-%>" },
 	{ modes = { "n", "i" }, lhs = "<M-x>" },
-	{ modes = { "n", "i" }, lhs = "<C-x>", nowait = true },
-	{ modes = { "n", "i" }, lhs = "<C-c>", nowait = true },
-	{ modes = { "n", "i" }, lhs = "<F1>", nowait = true },
+	{ modes = { "n", "i", "x" }, lhs = "<C-x>", nowait = true },
+	{ modes = { "n", "i", "x" }, lhs = "<C-c>", nowait = true },
+	{ modes = { "n", "i", "x" }, lhs = "<F1>", nowait = true },
 }
 
 local function has_buffer_map(mode, lhs)

@@ -155,11 +155,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781439096,
-        "narHash": "sha256-SrvhqYgQN7ns7oeH/oEjMdgJvbyvb6oxhP2GgrH/M68=",
+        "lastModified": 1781442499,
+        "narHash": "sha256-0x3EUgtjjTw8OpOUW4QtMXijhfspr4F17t+mhm1NbGs=",
         "owner": "so-vanilla",
         "repo": "softpair.nvim",
-        "rev": "fe831c4b554376fc7a072f13fcf1399e16bbc4f3",
+        "rev": "1bc5009372ee8ecb4d0961b6e654e0f4f5aae7e7",
         "type": "github"
       },
       "original": {

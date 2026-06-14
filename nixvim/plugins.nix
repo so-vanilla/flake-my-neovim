@@ -6,6 +6,16 @@
 }:
 let
   rootMarkers = import ./root-markers.nix;
+  nvimLibmodal = pkgs.vimUtils.buildVimPlugin {
+    pname = "nvim-libmodal";
+    version = "3.5.0";
+    src = pkgs.fetchFromGitHub {
+      owner = "Iron-E";
+      repo = "nvim-libmodal";
+      rev = "v3.5.0";
+      hash = "sha256-3BLBJ72e3v1UzGFmKPMbeCN9Sqm/iv8XMQ5iem6I4kg=";
+    };
+  };
   fzfBottomWinopts = {
     height = 8;
     width = 1;
@@ -26,6 +36,7 @@ let
 in
 {
   extraPlugins = [
+    nvimLibmodal
     softpairPlugin
   ];
 

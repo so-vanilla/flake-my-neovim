@@ -51,7 +51,7 @@ local function setup_undo(Hydra)
 ^-----------^
 _u_: undo
 _r_: redo
-_C-g_: quit
+_<C-g>_: quit
 _q_: quit
 ]],
 		config = {
@@ -81,7 +81,7 @@ local function setup_kmacro(Hydra)
 ^Repeat^
 ^--------------^
 _e_: call macro
-_C-g_: quit
+_<C-g>_: quit
 _q_: quit
 ]],
 		config = {
@@ -112,11 +112,11 @@ local function setup_softpair(Hydra)
 		hint = [[
 ^Edit^             ^Move^
 ^---------------------------------^
-_C-w_: squeeze     _]_: slurp forward
+_<C-w>_: squeeze   _]_: slurp forward
 _s_: splice        _}_: barf forward
 ^ ^                _[_: slurp backward
 ^ ^                _{_: barf backward
-_C-g_: quit
+_<C-g>_: quit
 _q_: quit
 ]],
 		config = {
@@ -180,7 +180,7 @@ _p_: prev    _l_: theirs/incoming   _L_: theirs all
 ^ ^          _b_: base              _B_: base all
 ^ ^          _a_: both              _A_: both all
 ^ ^          _0_: none              _N_: none all
-^ ^                                  _C-g_: quit
+^ ^                                  _<C-g>_: quit
 ^ ^                                  _q_: quit
 ]],
 		config = {
@@ -291,7 +291,7 @@ _j_: down         _3_: split right         _L_: width +
 _k_: up           _0_: close               _J_: height -
 _l_: right        _o_: next                _K_: height +
 _p_: previous     _=_: balance             _q_: quit
-^ ^               ^ ^                      _C-g_: quit
+^ ^               ^ ^                      _<C-g>_: quit
 ]],
 		config = {
 			color = "pink",
