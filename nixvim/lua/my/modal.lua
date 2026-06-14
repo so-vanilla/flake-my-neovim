@@ -2,6 +2,8 @@ local M = {}
 
 local restore_insert_after_head = false
 local active_layer = nil
+local modal_generation = 0
+local pending_generation = nil
 
 local function termcodes(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, false, true)
@@ -31,6 +33,13 @@ local function close_active_layer()
 	active_layer = nil
 end
 
+local function cancel_pending_activation()
+	if pending_generation then
+		modal_generation = modal_generation + 1
+		pending_generation = nil
+	end
+end
+
 local function protected(fn, title, exit_after)
 	return function()
 		local ok, err = pcall(fn)
@@ -38,9 +47,10 @@ local function protected(fn, title, exit_after)
 			vim.notify(err, vim.log.levels.ERROR, { title = title or "modal" })
 		end
 		if exit_after then
-			close_active_layer()
+			M.exit()
+		else
+			restore_insert()
 		end
-		restore_insert()
 	end
 end
 
@@ -94,6 +104,10 @@ local function show_hint(lines)
 end
 
 local function enter(name, hint, mappings, return_to_insert)
+	modal_generation = modal_generation + 1
+	local generation = modal_generation
+	pending_generation = nil
+
 	if return_to_insert ~= nil then
 		restore_insert_after_head = return_to_insert
 	else
@@ -104,6 +118,11 @@ local function enter(name, hint, mappings, return_to_insert)
 	close_active_layer()
 
 	local function activate()
+		if generation ~= modal_generation then
+			return
+		end
+		pending_generation = nil
+
 		local close_hint = show_hint(hint)
 		local layer_maps = {
 			i = {},
@@ -132,6 +151,7 @@ local function enter(name, hint, mappings, return_to_insert)
 			active_layer = {
 				layer = layer_or_err,
 				close_hint = close_hint,
+				generation = generation,
 			}
 		else
 			close_hint()
@@ -142,6 +162,7 @@ local function enter(name, hint, mappings, return_to_insert)
 	end
 
 	if layer_was_active then
+		pending_generation = generation
 		vim.schedule(activate)
 	else
 		activate()
@@ -149,6 +170,7 @@ local function enter(name, hint, mappings, return_to_insert)
 end
 
 local function exit()
+	cancel_pending_activation()
 	close_active_layer()
 	restore_insert()
 end
@@ -358,7 +380,7 @@ function M.exit()
 end
 
 function M.is_active()
-	return active_layer ~= nil
+	return active_layer ~= nil or pending_generation ~= nil
 end
 
 return M
