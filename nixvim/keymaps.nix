@@ -348,10 +348,31 @@ in
       mode = [
         "i"
         "n"
+        "x"
+      ];
+      key = "<C-x>";
+      action = "<Nop>";
+      options.desc = "Prefix only: C-x";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+        "x"
+      ];
+      key = "<C-c>";
+      action = "<Nop>";
+      options.desc = "Prefix only: C-c";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+        "x"
       ];
       key = "<F1>";
-      action = lua "function() require('fzf-lua').helptags() end";
-      options.desc = "Help";
+      action = "<Nop>";
+      options.desc = "Prefix only: F1";
     }
     {
       mode = [
