@@ -90,6 +90,13 @@ in
     );
 
   extraFiles = {
+    "after/ftplugin/NeogitStatus.lua".source = ./after/ftplugin/NeogitStatus.lua;
+    "after/ftplugin/_special_ui.lua".source = ./after/ftplugin/_special_ui.lua;
+    "after/ftplugin/grug-far.lua".source = ./after/ftplugin/grug-far.lua;
+    "after/ftplugin/help.lua".source = ./after/ftplugin/help.lua;
+    "after/ftplugin/man.lua".source = ./after/ftplugin/man.lua;
+    "after/ftplugin/oil.lua".source = ./after/ftplugin/oil.lua;
+    "after/ftplugin/qf.lua".source = ./after/ftplugin/qf.lua;
     "lua/my/editor.lua".source = ./lua/my/editor.lua;
     "lua/my/eval.lua".source = ./lua/my/eval.lua;
     "lua/my/hydras.lua".source = ./lua/my/hydras.lua;
