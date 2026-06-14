@@ -1,16 +1,11 @@
 local M = {}
 
 local restore_insert_after_head = false
+local active_layer = nil
 
-local function termcode(lhs)
-	return vim.api.nvim_replace_termcodes(lhs, true, true, true)
+local function termcodes(keys)
+	return vim.api.nvim_replace_termcodes(keys, true, false, true)
 end
-
-local keys = {
-	ctrl_g = termcode("<C-g>"),
-	ctrl_w = termcode("<C-w>"),
-	cr = termcode("<CR>"),
-}
 
 local function was_insert()
 	return vim.api.nvim_get_mode().mode:match("^[iR]") ~= nil
@@ -22,14 +17,28 @@ local function restore_insert()
 	end
 end
 
+local function close_active_layer()
+	if not active_layer then
+		return
+	end
+
+	if active_layer.layer and active_layer.layer:is_active() then
+		active_layer.layer:exit()
+	end
+	if active_layer.close_hint then
+		active_layer.close_hint()
+	end
+	active_layer = nil
+end
+
 local function protected(fn, title, exit_after)
-	return function(self)
+	return function()
 		local ok, err = pcall(fn)
 		if not ok then
 			vim.notify(err, vim.log.levels.ERROR, { title = title or "modal" })
 		end
-		if exit_after and self then
-			self.exit:set_local(true)
+		if exit_after then
+			close_active_layer()
 		end
 		restore_insert()
 	end
@@ -91,21 +100,46 @@ local function enter(name, hint, mappings, return_to_insert)
 		restore_insert_after_head = was_insert()
 	end
 
+	close_active_layer()
 	local close_hint = show_hint(hint)
-	local ok, err = pcall(function()
-		require("libmodal").mode.enter(name, mappings)
+	local layer_maps = {
+		i = {},
+		n = {},
+	}
+
+	for lhs, rhs in pairs(mappings) do
+		local map_lhs = termcodes(lhs)
+		for mode, maps in pairs(layer_maps) do
+			maps[map_lhs] = {
+				rhs = rhs,
+				desc = name,
+				noremap = true,
+				nowait = true,
+				silent = true,
+			}
+		end
+	end
+
+	local ok, layer_or_err = pcall(function()
+		local layer = require("libmodal").layer.new(layer_maps)
+		layer:enter()
+		return layer
 	end)
-	close_hint()
-	if not ok then
+	if ok then
+		active_layer = {
+			layer = layer_or_err,
+			close_hint = close_hint,
+		}
+	else
+		close_hint()
+		local err = layer_or_err
 		vim.notify(err, vim.log.levels.ERROR, { title = name })
 	end
 	restore_insert()
 end
 
-local function exit(self)
-	if self then
-		self.exit:set_local(true)
-	end
+local function exit()
+	close_active_layer()
 	restore_insert()
 end
 
@@ -158,8 +192,8 @@ function M.undo_then()
 	}, {
 		u = protected(undo, "undo"),
 		r = protected(redo, "undo"),
-		[keys.ctrl_g] = exit,
-		[keys.cr] = exit,
+		["<C-g>"] = exit,
+		["<CR>"] = exit,
 		q = exit,
 	}, return_to_insert)
 end
@@ -174,8 +208,8 @@ function M.redo_then()
 	}, {
 		u = protected(undo, "undo"),
 		r = protected(redo, "undo"),
-		[keys.ctrl_g] = exit,
-		[keys.cr] = exit,
+		["<C-g>"] = exit,
+		["<CR>"] = exit,
 		q = exit,
 	}, return_to_insert)
 end
@@ -190,8 +224,8 @@ function M.macro_end_and_call()
 		"C-g/q/CR: quit",
 	}, {
 		e = protected(macro.call, "macro"),
-		[keys.ctrl_g] = exit,
-		[keys.cr] = exit,
+		["<C-g>"] = exit,
+		["<CR>"] = exit,
 		q = exit,
 	}, return_to_insert)
 end
@@ -209,14 +243,14 @@ function M.softpair()
 		"[: slurp backward   {: barf backward",
 		"C-g/q/CR: quit",
 	}, {
-		[keys.ctrl_w] = protected(softpair.squeeze, "softpair"),
+		["<C-w>"] = protected(softpair.squeeze, "softpair"),
 		s = protected(softpair.splice, "softpair"),
 		["]"] = protected(softpair.slurp_forward, "softpair"),
 		["}"] = protected(softpair.barf_forward, "softpair"),
 		["["] = protected(softpair.slurp_backward, "softpair"),
 		["{"] = protected(softpair.barf_backward, "softpair"),
-		[keys.ctrl_g] = exit,
-		[keys.cr] = exit,
+		["<C-g>"] = exit,
+		["<CR>"] = exit,
 		q = exit,
 	}, was_insert())
 end
@@ -270,8 +304,8 @@ function M.conflict()
 		N = protected(function()
 			choose_all("none")
 		end, "git-conflict", true),
-		[keys.ctrl_g] = exit,
-		[keys.cr] = exit,
+		["<C-g>"] = exit,
+		["<CR>"] = exit,
 		q = exit,
 	}, was_insert())
 end
@@ -304,8 +338,8 @@ function M.window()
 		L = protected(wincmd("5>"), "window"),
 		J = protected(wincmd("3-"), "window"),
 		K = protected(wincmd("3+"), "window"),
-		[keys.ctrl_g] = exit,
-		[keys.cr] = exit,
+		["<C-g>"] = exit,
+		["<CR>"] = exit,
 		q = exit,
 	}, was_insert())
 end

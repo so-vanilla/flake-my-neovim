@@ -173,6 +173,10 @@ in
                 man = true,
                 NeogitStatus = true,
                 oil = true,
+                OverseerForm = true,
+                OverseerList = true,
+                OverseerOutput = true,
+                OverseerTask = true,
                 qf = true,
               }
               local disabled_buftypes = {
@@ -213,14 +217,13 @@ in
             0.25
           ];
           keymaps = {
+            "<C-e>" = false;
+            "<C-f>" = false;
+            "<C-j>" = false;
+            "<C-k>" = false;
             "<C-s>" = false;
             "<C-v>" = false;
             "<C-t>" = false;
-            "<C-f>" = {
-              __unkeyed-1 = "keymap.open";
-              opts.dir = "float";
-              desc = "Open task output in float";
-            };
             "<C-q>" = {
               __unkeyed-1 = "keymap.run_action";
               opts.action = "open output in quickfix";

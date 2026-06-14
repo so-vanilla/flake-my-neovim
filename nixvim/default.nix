@@ -150,7 +150,7 @@ in
       },
       hooks = {
         should_block = function(argv)
-          return vim.g.flatten_wait == 1 or vim.tbl_contains(argv, "-b")
+          return vim.g.flatten_wait ~= nil or vim.tbl_contains(argv, "-b")
         end,
         post_open = function(opts)
           if not opts.is_blocking and opts.winnr and vim.api.nvim_win_is_valid(opts.winnr) then

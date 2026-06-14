@@ -683,7 +683,7 @@ in
       ];
       key = "<C-x>o";
       action = lua "function() require('my.hydras').window() end";
-      options.desc = "Other window hydra";
+      options.desc = "Other window mode";
     }
     {
       mode = [
@@ -729,7 +729,7 @@ in
       ];
       key = "<C-x>u";
       action = lua "function() require('my.hydras').undo_then() end";
-      options.desc = "Undo hydra";
+      options.desc = "Undo mode";
     }
     {
       mode = [
@@ -738,7 +738,7 @@ in
       ];
       key = "<C-x>r";
       action = lua "function() require('my.hydras').redo_then() end";
-      options.desc = "Redo hydra";
+      options.desc = "Redo mode";
     }
     {
       mode = [
@@ -765,7 +765,7 @@ in
       ];
       key = "<C-x>e";
       action = lua "function() require('my.hydras').macro_end_and_call() end";
-      options.desc = "Call macro hydra";
+      options.desc = "Call macro mode";
     }
     {
       mode = [
@@ -888,7 +888,7 @@ in
       ];
       key = "<M-C-p>";
       action = lua "function() require('my.hydras').softpair() end";
-      options.desc = "Softpair hydra";
+      options.desc = "Softpair mode";
     }
     {
       mode = [
@@ -897,7 +897,7 @@ in
       ];
       key = "<C-c>^";
       action = lua "function() require('my.hydras').conflict() end";
-      options.desc = "Git conflict hydra";
+      options.desc = "Git conflict mode";
     }
     {
       mode = [
