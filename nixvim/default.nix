@@ -49,20 +49,37 @@ in
   };
 
   extraPackages = with pkgs; [
+    basedpyright
+    bash-language-server
+    deadnix
+    dockerfile-language-server
     fd
     fzf
     git
-    deadnix
+    google-java-format
+    gopls
+    gotools
+    hadolint
+    jdt-language-server
     luajitPackages.luacheck
     markdownlint-cli
-    nil
+    marksman
+    nixd
     nixfmt
+    nodejs_24
+    prettier
     ripgrep
+    ruff
     shellcheck
     shfmt
     statix
     stylua
+    taplo
+    terraform-ls
+    tflint
     wezterm
+    vscode-langservers-extracted
+    yaml-language-server
   ];
 
   extraFiles = {
@@ -111,6 +128,14 @@ in
       require("my.server").start()
     end
     vim.cmd.colorscheme("catppuccin-latte")
-    vim.cmd.startinsert()
+
+    local auto_insert_group = vim.api.nvim_create_augroup("MyAutoInsert", { clear = true })
+    vim.api.nvim_create_autocmd({ "UIEnter", "BufEnter", "BufWinEnter", "WinEnter" }, {
+      group = auto_insert_group,
+      callback = function()
+        require("my.editor").start_insert_if_editable()
+      end,
+    })
+    require("my.editor").start_insert_if_editable()
   '';
 }

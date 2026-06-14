@@ -55,4 +55,49 @@ function M.yank()
 	feed("<C-r>+", "n")
 end
 
+local insert_disabled_filetypes = {
+	fzf = true,
+	["grug-far"] = true,
+	help = true,
+	man = true,
+	NeogitStatus = true,
+	oil = true,
+	qf = true,
+}
+
+local insert_allowed_buftypes = {
+	[""] = true,
+	acwrite = true,
+}
+
+local function should_start_insert()
+	local mode = vim.api.nvim_get_mode().mode
+	if not mode:match("^n") then
+		return false
+	end
+
+	local buftype = vim.bo.buftype
+	if not insert_allowed_buftypes[buftype] then
+		return false
+	end
+
+	if insert_disabled_filetypes[vim.bo.filetype] then
+		return false
+	end
+
+	if vim.bo.modifiable == false or vim.bo.readonly then
+		return false
+	end
+
+	return true
+end
+
+function M.start_insert_if_editable()
+	vim.schedule(function()
+		if should_start_insert() then
+			vim.cmd.startinsert()
+		end
+	end)
+end
+
 return M

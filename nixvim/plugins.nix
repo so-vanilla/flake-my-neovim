@@ -366,44 +366,76 @@ in
       enable = true;
       inlayHints = true;
       servers = {
-        nil_ls = {
+        basedpyright.enable = true;
+        bashls.enable = true;
+        dockerls.enable = true;
+        gopls.enable = true;
+        jdtls.enable = true;
+        jsonls = {
           enable = true;
           settings = {
-            formatting.command = [ "nixfmt" ];
+            format.enable = true;
+            validate.enable = true;
           };
         };
         lua_ls = {
           enable = true;
           settings = {
-            Lua = {
-              diagnostics.globals = [ "vim" ];
-              workspace.checkThirdParty = false;
-            };
+            diagnostics.globals = [ "vim" ];
+            workspace.checkThirdParty = false;
+          };
+        };
+        marksman.enable = true;
+        nixd = {
+          enable = true;
+          settings = {
+            formatting.command = [ "nixfmt" ];
+          };
+        };
+        ruff.enable = true;
+        taplo.enable = true;
+        terraformls.enable = true;
+        yamlls = {
+          enable = true;
+          settings = {
+            completion = true;
+            hover = true;
+            validate = true;
           };
         };
       };
+    };
+
+    schemastore = {
+      enable = true;
+      json.enable = true;
+      yaml.enable = true;
     };
 
     treesitter = {
       enable = true;
       grammarPackages = with config.plugins.treesitter.package.builtGrammars; [
         bash
-        clojure
-        commonlisp
         diff
-        fennel
+        dockerfile
         gitcommit
         gitignore
-        janet_simple
+        go
+        gomod
+        gosum
+        gowork
+        hcl
+        java
         json
         lua
         luadoc
         markdown
         markdown_inline
         nix
+        python
         query
         regex
-        scheme
+        terraform
         toml
         vim
         vimdoc
@@ -425,9 +457,16 @@ in
         };
         formatters_by_ft = {
           bash = [ "shfmt" ];
+          go = [ "goimports" ];
+          java = [ "google-java-format" ];
+          json = [ "prettier" ];
           lua = [ "stylua" ];
+          markdown = [ "prettier" ];
           nix = [ "nixfmt" ];
+          python = [ "ruff_format" ];
           sh = [ "shfmt" ];
+          toml = [ "taplo" ];
+          yaml = [ "prettier" ];
         };
       };
     };
@@ -443,13 +482,17 @@ in
       };
       lintersByFt = {
         bash = [ "shellcheck" ];
+        dockerfile = [ "hadolint" ];
         lua = [ "luacheck" ];
         markdown = [ "markdownlint" ];
         nix = [
           "deadnix"
           "statix"
         ];
+        python = [ "ruff" ];
         sh = [ "shellcheck" ];
+        terraform = [ "tflint" ];
+        tf = [ "tflint" ];
       };
       autoCmd.event = [
         "BufWritePost"
