@@ -153,15 +153,6 @@ in
       };
     };
 
-    hydra = {
-      enable = true;
-      settings = {
-        hint = {
-          float_opts.border = "rounded";
-        };
-      };
-    };
-
     treesitter-context = {
       enable = true;
       settings = {
