@@ -36,6 +36,7 @@ let
 in
 {
   extraPlugins = [
+    pkgs.vimPlugins.flatten-nvim
     nvimLibmodal
     softpairPlugin
   ];
@@ -157,6 +158,133 @@ in
       settings = {
         hint = {
           float_opts.border = "rounded";
+        };
+      };
+    };
+
+    treesitter-context = {
+      enable = true;
+      settings = {
+        enable = true;
+        max_lines = 3;
+        min_window_height = 20;
+        line_numbers = true;
+        multiline_threshold = 4;
+        trim_scope = "outer";
+        mode = "cursor";
+        zindex = 20;
+        on_attach = {
+          __raw = ''
+            function(bufnr)
+              local disabled_filetypes = {
+                ["grug-far"] = true,
+                help = true,
+                man = true,
+                NeogitStatus = true,
+                oil = true,
+                qf = true,
+              }
+              local disabled_buftypes = {
+                nofile = true,
+                prompt = true,
+                quickfix = true,
+                terminal = true,
+              }
+              return not disabled_filetypes[vim.bo[bufnr].filetype]
+                and not disabled_buftypes[vim.bo[bufnr].buftype]
+            end
+          '';
+        };
+      };
+    };
+
+    overseer = {
+      enable = true;
+      settings = {
+        dap = false;
+        output = {
+          use_terminal = false;
+          preserve_output = false;
+        };
+        task_list = {
+          direction = "bottom";
+          min_height = 6;
+          max_height = [
+            12
+            0.25
+          ];
+          min_width = [
+            40
+            0.1
+          ];
+          max_width = [
+            100
+            0.25
+          ];
+          keymaps = {
+            "<C-s>" = false;
+            "<C-v>" = false;
+            "<C-t>" = false;
+            "<C-f>" = {
+              __unkeyed-1 = "keymap.open";
+              opts.dir = "float";
+              desc = "Open task output in float";
+            };
+            "<C-q>" = {
+              __unkeyed-1 = "keymap.run_action";
+              opts.action = "open output in quickfix";
+              desc = "Open task output in quickfix";
+            };
+            q = {
+              __unkeyed-1 = "<Cmd>close<CR>";
+              desc = "Close task list";
+            };
+          };
+        };
+        form = {
+          border = "single";
+          min_width = 70;
+          max_width = 0.8;
+          min_height = 8;
+          max_height = 0.8;
+        };
+        task_win = {
+          border = "single";
+          padding = 1;
+        };
+        component_aliases = {
+          default = [
+            "on_exit_set_status"
+            "on_complete_notify"
+            {
+              __unkeyed-1 = "on_complete_dispose";
+              require_view = [
+                "SUCCESS"
+                "FAILURE"
+              ];
+              timeout = 60;
+            }
+          ];
+          default_vscode = [
+            "default"
+            "on_result_diagnostics"
+          ];
+          default_builtin = [
+            "on_exit_set_status"
+            {
+              __unkeyed-1 = "on_complete_dispose";
+              timeout = 30;
+            }
+            {
+              __unkeyed-1 = "unique";
+              soft = true;
+            }
+          ];
+        };
+        template_timeout_ms = 3000;
+        template_cache_threshold_ms = 200;
+        log_level = {
+          __raw = "vim.log.levels.WARN";
         };
       };
     };

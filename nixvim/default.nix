@@ -132,6 +132,34 @@ in
     vim.fn.mkdir(vim.fn.stdpath("state"), "p")
     vim.g.project_history_no_data_notified = 1
     vim.g.nvim_surround_no_insert_mappings = true
+    require("flatten").setup({
+      block_for = {
+        gitcommit = true,
+        gitrebase = true,
+      },
+      nest_if_no_args = false,
+      allow_cmd_passthrough = true,
+      window = {
+        open = "current",
+        diff = "tab_vsplit",
+        focus = "first",
+      },
+      integrations = {
+        wezterm = true,
+        kitty = false,
+      },
+      hooks = {
+        should_block = function(argv)
+          return vim.g.flatten_wait == 1 or vim.tbl_contains(argv, "-b")
+        end,
+        post_open = function(opts)
+          if not opts.is_blocking and opts.winnr and vim.api.nvim_win_is_valid(opts.winnr) then
+            vim.api.nvim_set_current_win(opts.winnr)
+            require("my.editor").start_insert_if_editable()
+          end
+        end,
+      },
+    })
   '';
 
   extraConfigLuaPost = ''
