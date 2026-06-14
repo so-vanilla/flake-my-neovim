@@ -238,6 +238,11 @@ function M.macro_end_and_call()
 end
 
 function M.softpair()
+	local ok_special, special_ui = pcall(require, "my.special_ui")
+	if ok_special and special_ui.is_special() then
+		return
+	end
+
 	local ok, softpair = pcall(require, "softpair")
 	if not ok then
 		return

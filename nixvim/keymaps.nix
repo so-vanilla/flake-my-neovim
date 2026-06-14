@@ -91,7 +91,7 @@ let
     {
       mode = "i";
       key = "<C-d>";
-      action = lua "function() require('softpair').forward_delete_char() end";
+      action = lua "function() require('my.softpair').forward_delete_char() end";
       options.desc = "Softpair forward delete char";
     }
     {
@@ -106,7 +106,7 @@ let
         "n"
       ];
       key = "<C-k>";
-      action = lua "function() require('softpair').kill_line() end";
+      action = lua "function() require('my.softpair').kill_line() end";
       options.desc = "Softpair kill line";
     }
     {
@@ -115,7 +115,7 @@ let
         "n"
       ];
       key = "<C-S-k>";
-      action = lua "function() require('softpair').backward_kill_line() end";
+      action = lua "function() require('my.softpair').backward_kill_line() end";
       options.desc = "Softpair backward kill line";
     }
     {
@@ -124,7 +124,7 @@ let
         "n"
       ];
       key = "<M-C-d>";
-      action = lua "function() require('softpair').backward_kill_word() end";
+      action = lua "function() require('my.softpair').backward_kill_word() end";
       options.desc = "Softpair backward kill word";
     }
     {
@@ -133,7 +133,7 @@ let
         "n"
       ];
       key = "<M-BS>";
-      action = lua "function() require('softpair').backward_kill_word() end";
+      action = lua "function() require('my.softpair').backward_kill_word() end";
       options.desc = "Softpair backward kill word";
     }
     {
@@ -142,7 +142,7 @@ let
         "n"
       ];
       key = "<M-Del>";
-      action = lua "function() require('softpair').backward_kill_word() end";
+      action = lua "function() require('my.softpair').backward_kill_word() end";
       options.desc = "Softpair backward kill word";
     }
     {
@@ -175,7 +175,7 @@ let
         "n"
       ];
       key = "<M-d>";
-      action = lua "function() require('softpair').forward_kill_word() end";
+      action = lua "function() require('my.softpair').forward_kill_word() end";
       options.desc = "Softpair forward kill word";
     }
     {
@@ -185,7 +185,7 @@ let
         "x"
       ];
       key = "<M-C-f>";
-      action = lua "function() require('softpair').forward_sexp() end";
+      action = lua "function() require('my.softpair').forward_sexp() end";
       options.desc = "Softpair forward sexp";
     }
     {
@@ -195,7 +195,7 @@ let
         "x"
       ];
       key = "<M-C-b>";
-      action = lua "function() require('softpair').backward_sexp() end";
+      action = lua "function() require('my.softpair').backward_sexp() end";
       options.desc = "Softpair backward sexp";
     }
     {
@@ -205,7 +205,7 @@ let
         "x"
       ];
       key = "<M-C-a>";
-      action = lua "function() require('softpair').beginning_of_sexp() end";
+      action = lua "function() require('my.softpair').beginning_of_sexp() end";
       options.desc = "Softpair beginning of sexp";
     }
     {
@@ -215,7 +215,7 @@ let
         "x"
       ];
       key = "<M-C-e>";
-      action = lua "function() require('softpair').end_of_sexp() end";
+      action = lua "function() require('my.softpair').end_of_sexp() end";
       options.desc = "Softpair end of sexp";
     }
     {
@@ -225,7 +225,7 @@ let
         "x"
       ];
       key = "<M-(>";
-      action = lua "function() require('softpair').syntactic_backward_punct() end";
+      action = lua "function() require('my.softpair').syntactic_backward_punct() end";
       options.desc = "Softpair syntactic backward punct";
     }
     {
@@ -235,7 +235,7 @@ let
         "x"
       ];
       key = "<M-)>";
-      action = lua "function() require('softpair').syntactic_forward_punct() end";
+      action = lua "function() require('my.softpair').syntactic_forward_punct() end";
       options.desc = "Softpair syntactic forward punct";
     }
     {
@@ -244,7 +244,7 @@ let
         "n"
       ];
       key = "<C-c><Del>";
-      action = lua "function() require('softpair').force_delete() end";
+      action = lua "function() require('my.softpair').force_delete() end";
       options.desc = "Softpair force delete";
     }
   ];
@@ -320,7 +320,7 @@ in
     {
       mode = "x";
       key = "<C-w>";
-      action = ":<C-u>lua require('softpair').kill_active_region(vim.fn.visualmode())<CR>";
+      action = ":<C-u>lua require('my.softpair').kill_active_region(vim.fn.visualmode())<CR>";
       options.desc = "Softpair kill region";
     }
     {

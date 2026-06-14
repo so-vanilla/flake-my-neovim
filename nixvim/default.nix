@@ -130,6 +130,7 @@ in
     '';
     "lua/my/server.lua".source = ./lua/my/server.lua;
     "lua/my/special_edit.lua".source = ./lua/my/special_edit.lua;
+    "lua/my/softpair.lua".source = ./lua/my/softpair.lua;
     "lua/my/special_ui.lua".source = ./lua/my/special_ui.lua;
   };
 
