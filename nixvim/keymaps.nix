@@ -27,19 +27,13 @@ let
       options.desc = "Backward char";
     }
     {
-      mode = [
-        "i"
-        "c"
-      ];
+      mode = "i";
       key = "<C-p>";
       action = "<Up>";
       options.desc = "Previous line";
     }
     {
-      mode = [
-        "i"
-        "c"
-      ];
+      mode = "i";
       key = "<C-n>";
       action = "<Down>";
       options.desc = "Next line";

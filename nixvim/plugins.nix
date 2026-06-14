@@ -280,6 +280,11 @@ in
             "snippet_forward"
             "fallback"
           ];
+          "<C-i>" = [
+            "select_and_accept"
+            "snippet_forward"
+            "fallback"
+          ];
           "<S-Tab>" = [
             "snippet_backward"
             "fallback"
@@ -318,6 +323,22 @@ in
           enabled = true;
           keymap = {
             preset = "cmdline";
+            "<C-n>" = [
+              "select_next"
+              "fallback"
+            ];
+            "<C-p>" = [
+              "select_prev"
+              "fallback"
+            ];
+            "<CR>" = [
+              "accept_and_enter"
+              "fallback"
+            ];
+            "<C-m>" = [
+              "accept_and_enter"
+              "fallback"
+            ];
             "<Left>" = false;
             "<Right>" = false;
           };
