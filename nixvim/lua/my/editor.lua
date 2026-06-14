@@ -9,6 +9,11 @@ local function feed(keys, mode)
 end
 
 function M.keyboard_quit()
+	local ok_modal, modal = pcall(require, "my.modal")
+	if ok_modal and modal.is_active and modal.is_active() then
+		modal.exit()
+	end
+
 	pcall(vim.cmd.nohlsearch)
 
 	local ok, cmp = pcall(require, "blink.cmp")

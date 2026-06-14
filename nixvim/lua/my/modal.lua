@@ -100,42 +100,52 @@ local function enter(name, hint, mappings, return_to_insert)
 		restore_insert_after_head = was_insert()
 	end
 
+	local layer_was_active = active_layer ~= nil
 	close_active_layer()
-	local close_hint = show_hint(hint)
-	local layer_maps = {
-		i = {},
-		n = {},
-	}
 
-	for lhs, rhs in pairs(mappings) do
-		local map_lhs = termcodes(lhs)
-		for mode, maps in pairs(layer_maps) do
-			maps[map_lhs] = {
-				rhs = rhs,
-				desc = name,
-				noremap = true,
-				nowait = true,
-				silent = true,
-			}
-		end
-	end
-
-	local ok, layer_or_err = pcall(function()
-		local layer = require("libmodal").layer.new(layer_maps)
-		layer:enter()
-		return layer
-	end)
-	if ok then
-		active_layer = {
-			layer = layer_or_err,
-			close_hint = close_hint,
+	local function activate()
+		local close_hint = show_hint(hint)
+		local layer_maps = {
+			i = {},
+			n = {},
 		}
-	else
-		close_hint()
-		local err = layer_or_err
-		vim.notify(err, vim.log.levels.ERROR, { title = name })
+
+		for lhs, rhs in pairs(mappings) do
+			local map_lhs = termcodes(lhs)
+			for mode, maps in pairs(layer_maps) do
+				maps[map_lhs] = {
+					rhs = rhs,
+					desc = name,
+					noremap = true,
+					nowait = true,
+					silent = true,
+				}
+			end
+		end
+
+		local ok, layer_or_err = pcall(function()
+			local layer = require("libmodal").layer.new(layer_maps)
+			layer:enter()
+			return layer
+		end)
+		if ok then
+			active_layer = {
+				layer = layer_or_err,
+				close_hint = close_hint,
+			}
+		else
+			close_hint()
+			local err = layer_or_err
+			vim.notify(err, vim.log.levels.ERROR, { title = name })
+		end
+		restore_insert()
 	end
-	restore_insert()
+
+	if layer_was_active then
+		vim.schedule(activate)
+	else
+		activate()
+	end
 end
 
 local function exit()
@@ -192,7 +202,6 @@ function M.undo_then()
 	}, {
 		u = protected(undo, "undo"),
 		r = protected(redo, "undo"),
-		["<C-g>"] = exit,
 		["<CR>"] = exit,
 		q = exit,
 	}, return_to_insert)
@@ -208,7 +217,6 @@ function M.redo_then()
 	}, {
 		u = protected(undo, "undo"),
 		r = protected(redo, "undo"),
-		["<C-g>"] = exit,
 		["<CR>"] = exit,
 		q = exit,
 	}, return_to_insert)
@@ -224,7 +232,6 @@ function M.macro_end_and_call()
 		"C-g/q/CR: quit",
 	}, {
 		e = protected(macro.call, "macro"),
-		["<C-g>"] = exit,
 		["<CR>"] = exit,
 		q = exit,
 	}, return_to_insert)
@@ -249,7 +256,6 @@ function M.softpair()
 		["}"] = protected(softpair.barf_forward, "softpair"),
 		["["] = protected(softpair.slurp_backward, "softpair"),
 		["{"] = protected(softpair.barf_backward, "softpair"),
-		["<C-g>"] = exit,
 		["<CR>"] = exit,
 		q = exit,
 	}, was_insert())
@@ -304,7 +310,6 @@ function M.conflict()
 		N = protected(function()
 			choose_all("none")
 		end, "git-conflict", true),
-		["<C-g>"] = exit,
 		["<CR>"] = exit,
 		q = exit,
 	}, was_insert())
@@ -338,10 +343,17 @@ function M.window()
 		L = protected(wincmd("5>"), "window"),
 		J = protected(wincmd("3-"), "window"),
 		K = protected(wincmd("3+"), "window"),
-		["<C-g>"] = exit,
 		["<CR>"] = exit,
 		q = exit,
 	}, was_insert())
+end
+
+function M.exit()
+	exit()
+end
+
+function M.is_active()
+	return active_layer ~= nil
 end
 
 return M

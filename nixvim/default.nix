@@ -91,6 +91,10 @@ in
 
   extraFiles = {
     "after/ftplugin/NeogitStatus.lua".source = ./after/ftplugin/NeogitStatus.lua;
+    "after/ftplugin/OverseerForm.lua".source = ./after/ftplugin/OverseerForm.lua;
+    "after/ftplugin/OverseerList.lua".source = ./after/ftplugin/OverseerList.lua;
+    "after/ftplugin/OverseerOutput.lua".source = ./after/ftplugin/OverseerOutput.lua;
+    "after/ftplugin/OverseerTask.lua".source = ./after/ftplugin/OverseerTask.lua;
     "after/ftplugin/_special_ui.lua".source = ./after/ftplugin/_special_ui.lua;
     "after/ftplugin/grug-far.lua".source = ./after/ftplugin/grug-far.lua;
     "after/ftplugin/help.lua".source = ./after/ftplugin/help.lua;
