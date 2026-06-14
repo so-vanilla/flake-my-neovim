@@ -682,7 +682,7 @@ in
         "i"
       ];
       key = "<C-x>o";
-      action = lua "function() require('my.hydras').window() end";
+      action = lua "function() require('my.modal').window() end";
       options.desc = "Other window mode";
     }
     {
@@ -728,7 +728,7 @@ in
         "i"
       ];
       key = "<C-x>u";
-      action = lua "function() require('my.hydras').undo_then() end";
+      action = lua "function() require('my.modal').undo_then() end";
       options.desc = "Undo mode";
     }
     {
@@ -737,7 +737,7 @@ in
         "i"
       ];
       key = "<C-x>r";
-      action = lua "function() require('my.hydras').redo_then() end";
+      action = lua "function() require('my.modal').redo_then() end";
       options.desc = "Redo mode";
     }
     {
@@ -764,7 +764,7 @@ in
         "i"
       ];
       key = "<C-x>e";
-      action = lua "function() require('my.hydras').macro_end_and_call() end";
+      action = lua "function() require('my.modal').macro_end_and_call() end";
       options.desc = "Call macro mode";
     }
     {
@@ -887,7 +887,7 @@ in
         "i"
       ];
       key = "<M-C-p>";
-      action = lua "function() require('my.hydras').softpair() end";
+      action = lua "function() require('my.modal').softpair() end";
       options.desc = "Softpair mode";
     }
     {
@@ -896,7 +896,7 @@ in
         "i"
       ];
       key = "<C-c>^";
-      action = lua "function() require('my.hydras').conflict() end";
+      action = lua "function() require('my.modal').conflict() end";
       options.desc = "Git conflict mode";
     }
     {

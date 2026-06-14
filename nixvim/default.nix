@@ -101,6 +101,7 @@ in
     "lua/my/eval.lua".source = ./lua/my/eval.lua;
     "lua/my/hydras.lua".source = ./lua/my/hydras.lua;
     "lua/my/macro.lua".source = ./lua/my/macro.lua;
+    "lua/my/modal.lua".source = ./lua/my/modal.lua;
     "lua/my/project.lua".source = ./lua/my/project.lua;
     "lua/my/region.lua".source = ./lua/my/region.lua;
     "lua/my/replace.lua".source = ./lua/my/replace.lua;
@@ -125,6 +126,7 @@ in
     '';
     "lua/my/server.lua".source = ./lua/my/server.lua;
     "lua/my/special_edit.lua".source = ./lua/my/special_edit.lua;
+    "lua/my/special_ui.lua".source = ./lua/my/special_ui.lua;
   };
 
   extraConfigLuaPre = ''
@@ -163,25 +165,13 @@ in
   '';
 
   extraConfigLuaPost = ''
+    local special_ui = require("my.special_ui")
     require("softpair").setup({
       mappings = true,
-      disabled_filetypes = {
-        fzf = true,
-        ["grug-far"] = true,
-        help = true,
-        man = true,
-        NeogitStatus = true,
-        oil = true,
-        qf = true,
-      },
-      disabled_buftypes = {
-        nofile = true,
-        prompt = true,
-        quickfix = true,
-        terminal = true,
-      },
+      disabled_filetypes = special_ui.filetypes,
+      disabled_buftypes = special_ui.buftypes,
     })
-    require("my.hydras").setup()
+    require("my.modal").setup()
     if #vim.api.nvim_list_uis() > 0 then
       require("my.server").start()
     end

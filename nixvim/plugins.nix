@@ -167,26 +167,7 @@ in
         on_attach = {
           __raw = ''
             function(bufnr)
-              local disabled_filetypes = {
-                ["grug-far"] = true,
-                help = true,
-                man = true,
-                NeogitStatus = true,
-                oil = true,
-                OverseerForm = true,
-                OverseerList = true,
-                OverseerOutput = true,
-                OverseerTask = true,
-                qf = true,
-              }
-              local disabled_buftypes = {
-                nofile = true,
-                prompt = true,
-                quickfix = true,
-                terminal = true,
-              }
-              return not disabled_filetypes[vim.bo[bufnr].filetype]
-                and not disabled_buftypes[vim.bo[bufnr].buftype]
+              return not require("my.special_ui").is_special(bufnr)
             end
           '';
         };
