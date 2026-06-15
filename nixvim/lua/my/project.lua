@@ -94,6 +94,33 @@ local function open_oil(path)
 	require("oil").open(vim.fn.expand(path))
 end
 
+local function trailing_slash(path)
+	if path:sub(-1) == "/" then
+		return path
+	end
+	return path .. "/"
+end
+
+function M.find_file_input()
+	vim.ui.input({
+		prompt = "Find file> ",
+		default = trailing_slash(vim.fn.fnamemodify(M.root(), ":p")),
+		completion = "file",
+	}, function(input)
+		if input == nil or input == "" then
+			return
+		end
+
+		local path = vim.fn.expand(input)
+		if vim.fn.isdirectory(path) == 1 then
+			open_oil(path)
+			return
+		end
+
+		vim.cmd.edit(vim.fn.fnameescape(path))
+	end)
+end
+
 function M.oil_root()
 	open_oil(M.root())
 end

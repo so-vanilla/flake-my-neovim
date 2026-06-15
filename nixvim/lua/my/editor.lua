@@ -35,6 +35,16 @@ function M.move_beginning_of_line()
 	vim.api.nvim_win_set_cursor(0, { row, target })
 end
 
+function M.beginning_of_buffer()
+	vim.api.nvim_win_set_cursor(0, { 1, 0 })
+end
+
+function M.end_of_buffer()
+	local last_row = vim.api.nvim_buf_line_count(0)
+	local line = vim.api.nvim_buf_get_lines(0, last_row - 1, last_row, false)[1] or ""
+	vim.api.nvim_win_set_cursor(0, { last_row, #line })
+end
+
 local function diagnostic_jump(count)
 	if vim.diagnostic.jump then
 		vim.diagnostic.jump({

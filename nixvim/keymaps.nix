@@ -89,6 +89,32 @@ let
       options.desc = "End of line";
     }
     {
+      mode = "c";
+      key = "<C-k>";
+      action = "<C-\\>estrpart(getcmdline(), 0, getcmdpos() - 1)<CR>";
+      options.desc = "Kill command line";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+        "x"
+      ];
+      key = "<M-<>";
+      action = lua "function() require('my.editor').beginning_of_buffer() end";
+      options.desc = "Beginning of buffer";
+    }
+    {
+      mode = [
+        "i"
+        "n"
+        "x"
+      ];
+      key = "<M->>";
+      action = lua "function() require('my.editor').end_of_buffer() end";
+      options.desc = "End of buffer";
+    }
+    {
       mode = "i";
       key = "<C-d>";
       action = lua "function() require('my.softpair').forward_delete_char() end";
@@ -565,7 +591,16 @@ in
         "i"
       ];
       key = "<C-x><C-f>";
-      action = lua "function() require('fzf-lua').files() end";
+      action = lua "function() require('my.project').find_file_input() end";
+      options.desc = "Find file";
+    }
+    {
+      mode = [
+        "n"
+        "i"
+      ];
+      key = "<C-x>f";
+      action = lua "function() require('my.project').find_file_input() end";
       options.desc = "Find file";
     }
     {

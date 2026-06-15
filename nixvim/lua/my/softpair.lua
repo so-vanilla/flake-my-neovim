@@ -18,6 +18,32 @@ local function call(name, ...)
 	return softpair[name](...)
 end
 
+local function matching_pair()
+	if is_special_ui() then
+		return
+	end
+
+	local ok_sexp, sexp = pcall(require, "softpair.sexp")
+	local ok_doc, doc = pcall(require, "softpair.doc")
+	if not ok_sexp or not ok_doc then
+		return
+	end
+
+	local text = doc.text()
+	local point = doc.point()
+	local target = sexp.match_forward(text, point) or sexp.match_backward(text, point)
+	if not target then
+		return
+	end
+
+	doc.set_point(target)
+	return target
+end
+
+local function match_or_call(name)
+	return matching_pair() or call(name)
+end
+
 function M.forward_delete_char()
 	return call("forward_delete_char")
 end
@@ -39,11 +65,11 @@ function M.forward_kill_word()
 end
 
 function M.forward_sexp()
-	return call("forward_sexp")
+	return match_or_call("forward_sexp")
 end
 
 function M.backward_sexp()
-	return call("backward_sexp")
+	return match_or_call("backward_sexp")
 end
 
 function M.beginning_of_sexp()

@@ -89,6 +89,7 @@ in
                 ["ctrl-q"] = "select-all+accept",
                 ["ctrl-u"] = "half-page-up",
                 ["ctrl-d"] = "half-page-down",
+                ["ctrl-k"] = "kill-line",
               }
             '';
           };
@@ -404,11 +405,11 @@ in
             "fallback"
           ];
           "<CR>" = [
-            "select_and_accept"
+            "accept"
             "fallback"
           ];
           "<C-m>" = [
-            "select_and_accept"
+            "accept"
             "fallback"
           ];
         };
