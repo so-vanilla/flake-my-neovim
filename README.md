@@ -10,6 +10,16 @@ Emacs-style Neovim and WezTerm configuration managed by Nix.
 - tmux is installed for Claude Code terminal-jack experiments, but the config does not start or depend on tmux.
 - org-mode is intentionally not included.
 
+## WezTerm Keyboard Recovery
+
+The exported Neovim package wraps nixvim's generated package. The wrapper calls
+the generated store path directly, preserves Neovim's exit code, and then sends
+`CSI < u` only when stdout is a TTY, `WEZTERM_PANE` is set, and Neovim was not
+started with `--headless`.
+
+`vim` and `vi` are aliases to the wrapped `nvim`, so they get the same WezTerm
+keyboard recovery behavior.
+
 ## Special Edit
 
 The intended layout is a persistent Neovim pane on the left and a terminal or Claude Code pane on the right.

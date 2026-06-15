@@ -64,6 +64,69 @@
           ];
         };
 
+      mkWeztermResetNvim =
+        pkgs: nvimPackage:
+        pkgs.symlinkJoin {
+          name = "${nvimPackage.name}-wezterm-reset";
+          paths = [ nvimPackage ];
+          postBuild = ''
+            rm -f "$out/bin/nvim" "$out/bin/vim" "$out/bin/vi"
+
+            cat > "$out/bin/nvim" <<'EOF'
+            #!${pkgs.runtimeShell}
+            is_headless=0
+            for arg in "$@"; do
+              case "$arg" in
+                --headless)
+                  is_headless=1
+                  ;;
+              esac
+            done
+
+            "${nvimPackage}/bin/nvim" "$@"
+            status=$?
+
+            if [ "$is_headless" -eq 0 ] && [ -t 1 ] && [ -n "''${WEZTERM_PANE:-}" ]; then
+              printf '\033[<u'
+            fi
+
+            exit "$status"
+            EOF
+
+            chmod +x "$out/bin/nvim"
+            ln -s nvim "$out/bin/vim"
+            ln -s nvim "$out/bin/vi"
+          '';
+        };
+
+      mkWeztermResetCheck =
+        pkgs: wrappedNvim:
+        pkgs.runCommand "wezterm-reset-nvim-check" { } ''
+          export HOME="$TMPDIR/home"
+          export XDG_CACHE_HOME="$TMPDIR/cache"
+          export XDG_CONFIG_HOME="$TMPDIR/config"
+          export XDG_DATA_HOME="$TMPDIR/data"
+          export XDG_STATE_HOME="$TMPDIR/state"
+          mkdir -p "$HOME" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
+
+          set +e
+          "${wrappedNvim}/bin/nvim" --headless +'cq 42' > stdout.log
+          status=$?
+          set -e
+
+          test "$status" -eq 42
+          test ! -s stdout.log
+
+          WEZTERM_PANE=1 "${wrappedNvim}/bin/nvim" --headless +'quit' > wezterm-headless.log
+          test ! -s wezterm-headless.log
+
+          "${wrappedNvim}/bin/nvim" --version > nvim-version.log
+          "${wrappedNvim}/bin/vim" --version > vim-version.log
+          "${wrappedNvim}/bin/vi" --version > vi-version.log
+
+          touch "$out"
+        '';
+
       mkWeztermConfigText =
         system:
         builtins.replaceStrings
@@ -111,13 +174,14 @@
           pkgs = mkPkgs system;
           nvimConfig = mkNvimConfig system;
           nvimPackage = nvimConfig.config.build.package;
+          wrappedNvimPackage = mkWeztermResetNvim pkgs nvimPackage;
           weztermConfigText = mkWeztermConfigText system;
           weztermConfig = pkgs.writeText "wezterm.lua" weztermConfigText;
         in
         {
           packages = {
-            default = nvimPackage;
-            neovim = nvimPackage;
+            default = wrappedNvimPackage;
+            neovim = wrappedNvimPackage;
             wezterm-config = weztermConfig;
           };
 
@@ -125,6 +189,7 @@
             default = nvimConfig.config.build.test;
             nixvim = nvimConfig.config.build.test;
             softpair = softpair.checks.${system}.default;
+            wezterm-reset-wrapper = mkWeztermResetCheck pkgs wrappedNvimPackage;
           };
 
           formatter = pkgs.nixfmt-tree;
