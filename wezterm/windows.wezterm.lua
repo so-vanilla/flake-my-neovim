@@ -30,8 +30,8 @@ config.enable_csi_u_key_encoding = false
 -- Do not treat left Ctrl+Alt as AltGr. This keeps C-M-* mappings distinguishable.
 config.treat_left_ctrlalt_as_altgr = false
 
--- Uncomment and adjust if the desired default is WSL rather than PowerShell.
--- config.default_prog = { "wsl.exe", "--cd", "~" }
+-- Adjust the distribution name if Windows reports it as Ubuntu-24.04 or similar.
+config.default_prog = { "wsl.exe", "--distribution", "Ubuntu", "--cd", "~" }
 
 config.leader = {
 	key = "o",

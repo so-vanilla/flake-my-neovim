@@ -27,6 +27,7 @@ Failure is explicit. If Neovim is not installed, the configured RPC socket is no
 `wezterm/windows.wezterm.lua` is a copy-paste Windows config. It is not wired into the Nix outputs.
 
 - Default WezTerm key bindings are disabled so Ctrl/Alt combinations are passed to the foreground program.
+- The default entry point is WSL Ubuntu via `wsl.exe --distribution Ubuntu --cd ~`.
 - `M-o` is the only reserved WezTerm leader; pane controls, reload, and debug overlay live under that prefix.
 - Kitty keyboard protocol is enabled so Neovim can request disambiguated keys such as `C-d`, `C-i`, `C-m`, and `M-*`.
 - Windows ConPTY win32 input mode is disabled for WSL/Neovim-oriented use because it takes precedence over CSI-u style encodings.
