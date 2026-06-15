@@ -87,7 +87,7 @@
             status=$?
 
             if [ "$is_headless" -eq 0 ] && [ -t 1 ] && [ -n "''${WEZTERM_PANE:-}" ]; then
-              printf '\033[<u'
+              printf '\033[=0u' > /dev/tty
             fi
 
             exit "$status"
