@@ -66,36 +66,61 @@
 
       mkWeztermResetNvim =
         pkgs: nvimPackage:
+        let
+          mkEditorWrapper =
+            name:
+            pkgs.writeShellScriptBin name ''
+              is_headless=0
+              for arg in "$@"; do
+                case "$arg" in
+                  --headless)
+                    is_headless=1
+                    ;;
+                esac
+              done
+
+              is_wezterm=0
+
+              if [ -n "''${WEZTERM_PANE:-}" ]; then
+                is_wezterm=1
+              fi
+
+              if [ "''${TERM_PROGRAM:-}" = "WezTerm" ]; then
+                is_wezterm=1
+              fi
+
+              if [ "''${TERM:-}" = "wezterm" ]; then
+                is_wezterm=1
+              fi
+
+              reset_wezterm_keyboard() {
+                if [ "$is_headless" -eq 0 ] && [ "$is_wezterm" -eq 1 ]; then
+                  ( printf '\033[=0u' > /dev/tty ) 2>/dev/null || true
+                fi
+              }
+
+              trap reset_wezterm_keyboard EXIT
+
+              "${nvimPackage}/bin/${name}" "$@"
+              status=$?
+
+              exit "$status"
+            '';
+
+          nvimWrapper = mkEditorWrapper "nvim";
+          vimWrapper = mkEditorWrapper "vim";
+          viWrapper = mkEditorWrapper "vi";
+        in
         pkgs.symlinkJoin {
           name = "${nvimPackage.name}-wezterm-reset";
           paths = [ nvimPackage ];
+
           postBuild = ''
             rm -f "$out/bin/nvim" "$out/bin/vim" "$out/bin/vi"
 
-            cat > "$out/bin/nvim" <<'EOF'
-            #!${pkgs.runtimeShell}
-            is_headless=0
-            for arg in "$@"; do
-              case "$arg" in
-                --headless)
-                  is_headless=1
-                  ;;
-              esac
-            done
-
-            "${nvimPackage}/bin/nvim" "$@"
-            status=$?
-
-            if [ "$is_headless" -eq 0 ] && [ -t 1 ] && [ -n "''${WEZTERM_PANE:-}" ]; then
-              printf '\033[=0u' > /dev/tty
-            fi
-
-            exit "$status"
-            EOF
-
-            chmod +x "$out/bin/nvim"
-            ln -s nvim "$out/bin/vim"
-            ln -s nvim "$out/bin/vi"
+            ln -s "${nvimWrapper}/bin/nvim" "$out/bin/nvim"
+            ln -s "${vimWrapper}/bin/vim" "$out/bin/vim"
+            ln -s "${viWrapper}/bin/vi" "$out/bin/vi"
           '';
         };
 
@@ -182,6 +207,7 @@
           packages = {
             default = wrappedNvimPackage;
             neovim = wrappedNvimPackage;
+            neovim-unwrapped = nvimPackage;
             wezterm-config = weztermConfig;
           };
 
