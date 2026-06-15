@@ -21,3 +21,14 @@ The intended layout is a persistent Neovim pane on the left and a terminal or Cl
 - Press `C-c C-k` to cancel.
 
 Failure is explicit. If Neovim is not installed, the configured RPC socket is not available, or `wezterm cli` cannot target the pane, WezTerm or Neovim reports the failed boundary instead of falling back to a second editor instance. The RPC server is started only for an interactive Neovim UI, so flake checks and other headless commands do not create runtime sockets.
+
+## Windows WezTerm
+
+`wezterm/windows.wezterm.lua` is a copy-paste Windows config. It is not wired into the Nix outputs.
+
+- Default WezTerm key bindings are disabled so Ctrl/Alt combinations are passed to the foreground program.
+- `M-o` is the only reserved WezTerm leader; pane controls, reload, and debug overlay live under that prefix.
+- Kitty keyboard protocol is enabled so Neovim can request disambiguated keys such as `C-d`, `C-i`, `C-m`, and `M-*`.
+- Windows ConPTY win32 input mode is disabled for WSL/Neovim-oriented use because it takes precedence over CSI-u style encodings.
+- Global CSI-u is left disabled because it changes shell behavior for keys such as `C-c` and `C-d`.
+- Special Edit is intentionally omitted.
